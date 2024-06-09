@@ -36,7 +36,7 @@ import static com.example.cielobackend.common.ExceptionMessages.*;
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
-    @Value("${rabbitmq.deleted-images-q.name}")
+    @Value("${rabbitmq.images-exchange.name}")
     private String imagesExchange;
     @Value("${rabbitmq.deleted-images-q.routing-key}")
     private String deletedImagesQueueRoutingKey;

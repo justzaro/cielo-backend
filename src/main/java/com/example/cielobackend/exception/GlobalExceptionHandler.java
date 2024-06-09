@@ -10,7 +10,10 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    @ExceptionHandler({
+            ResourceAlreadyExistsException.class,
+            DuplicateUniqueFieldException.class
+    })
     public ResponseEntity<ErrorResponse> handleConflictExceptions(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();
 

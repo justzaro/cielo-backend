@@ -1,6 +1,10 @@
 package com.example.cielobackend.dto;
 
+import com.example.cielobackend.common.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -36,4 +40,12 @@ public class UserDto {
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateOfBirth;
+
+    private Double balance = 0.0;
+
+    private Double bonusPoints = 0.0;
+
+    private Boolean isLocked = false;
+
+    private Boolean isEnabled = true;
 }
