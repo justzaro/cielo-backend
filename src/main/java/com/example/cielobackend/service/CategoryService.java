@@ -16,4 +16,5 @@ public interface CategoryService {
    void deleteCategory(long id);
    void setCategoryImageName(long id, String imageName);
    AttributeDtoResponse addAttribute(long categoryId, long attributeId);
+   Long countAllListingsByCategory(long id);
 }

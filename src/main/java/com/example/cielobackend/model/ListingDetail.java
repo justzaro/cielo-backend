@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -22,6 +23,6 @@ public class ListingDetail {
     @JoinColumn(name = "attribute_id")
     private Attribute attribute;
 
-    @OneToMany(mappedBy = "listingDetailValue", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "listingDetailValue", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<ListingDetailValue> detailValues;
 }

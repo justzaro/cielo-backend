@@ -1,5 +1,7 @@
 package com.example.cielobackend.dto;
 
+import com.example.cielobackend.common.enums.ListingType;
+import com.example.cielobackend.common.enums.QualityType;
 import com.example.cielobackend.model.Category;
 import com.example.cielobackend.model.ListingDetail;
 import com.example.cielobackend.model.ListingImage;
@@ -43,9 +45,13 @@ public class ListingDtoResponse {
 
     private Boolean isAutoRenewable;
 
+    private QualityType quality;
+
+    private ListingType type;
+
     private CategoryDtoResponse category;
 
     private List<ListingImageDtoResponse> images;
 
-    private List<ListingDetailDtoResponse> listingDetails;
+    private List<ListingDetailDtoResponse> details;
 }

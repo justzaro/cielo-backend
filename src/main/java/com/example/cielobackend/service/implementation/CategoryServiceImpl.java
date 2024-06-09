@@ -16,6 +16,8 @@ import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.example.cielobackend.common.ExceptionMessages.*;
@@ -33,16 +36,19 @@ import static com.example.cielobackend.common.ExceptionMessages.*;
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
+    @Value("${rabbitmq.deleted-images-q.name}")
+    private String imagesExchange;
+    @Value("${rabbitmq.deleted-images-q.routing-key}")
+    private String deletedImagesQueueRoutingKey;
+    private final RabbitTemplate rabbitTemplate;
     private final CategoryRepository categoryRepository;
     private final AttributeRepository attributeRepository;
     private final ModelMapper modelMapper = new ModelMapper();
-    private final Logger logger = LoggerFactory.getLogger(CategoryServiceImpl.class);
 
     @Override
     public CategoryDtoResponse getCategoryById(long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
-
         return modelMapper.map(category, CategoryDtoResponse.class);
     }
 
@@ -101,7 +107,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void setCategoryImageName(long id, String name) {
-        System.out.println(name);
         CategoryDtoResponse category = getCategoryById(id);
         Category mappedCategory = modelMapper.map(category, Category.class);
         mappedCategory.setImageName(name);
@@ -112,6 +117,18 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
+        sendCategoryImageToDeletionQueue(category.getImageName());
         categoryRepository.delete(category);
+    }
+
+    @Override
+    public Long countAllListingsByCategory(long id) {
+        return categoryRepository.countAllByCategoryId(id);
+    }
+
+    private void sendCategoryImageToDeletionQueue(String imageName) {
+        rabbitTemplate.convertAndSend(imagesExchange,
+                                      deletedImagesQueueRoutingKey,
+                                      imageName);
     }
 }

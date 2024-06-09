@@ -2,6 +2,7 @@ package com.example.cielobackend.controller;
 
 import com.example.cielobackend.dto.ListingDto;
 import com.example.cielobackend.dto.ListingDtoResponse;
+import com.example.cielobackend.dto.ListingDtoUpdate;
 import com.example.cielobackend.service.ListingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,12 @@ public class ListingController {
     @PostMapping
     public ListingDtoResponse addListing(@RequestBody @Valid ListingDto listingDto) {
         return listingService.addListing(listingDto);
+    }
+
+    @PutMapping("/{id}")
+    public ListingDtoResponse updateListing(@PathVariable long id,
+                                            @RequestBody @Valid ListingDtoUpdate listingDto) {
+        return listingService.updateListing(id, listingDto);
     }
 
     @DeleteMapping("/{id}")

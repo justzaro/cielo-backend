@@ -30,6 +30,11 @@ public class CategoryController {
         return categoryService.getCategories();
     }
 
+    @GetMapping("/{id}/listings/count")
+    public Long getListingsCountByCategoryId(@PathVariable long id) {
+        return categoryService.countAllListingsByCategory(id);
+    }
+
     @PostMapping
     public CategoryDtoResponse addCategory(@RequestBody @Valid CategoryDto categoryDto) {
         return categoryService.addCategory(categoryDto);
