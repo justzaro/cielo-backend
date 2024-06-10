@@ -5,6 +5,8 @@ import com.example.cielobackend.dto.UserDtoResponse;
 import com.example.cielobackend.model.User;
 import com.example.cielobackend.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +18,17 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
+    @GetMapping("/{id}")
+    public UserDtoResponse getUserById(@PathVariable long id) {
+        return userService.getUser(id);
+    }
+
     @GetMapping
-    private Page<UserDtoResponse> getUsers(@RequestParam(value = "page_no", defaultValue = "1") Integer pageNo,
-                                           @RequestParam(value = "limit", defaultValue = "10") Integer limit,
-                                           @RequestParam(value = "order_by", defaultValue = "firstName") String sortBy,
-                                           @RequestParam(value = "order_type", defaultValue = "asc") String orderBy) {
+    private Page<UserDtoResponse> getUsers(
+            @RequestParam(value = "pageNo", defaultValue = "1") @Min(1) Integer pageNo,
+            @RequestParam(value = "limit", defaultValue = "10") @Min(1) @Max(20) Integer limit,
+            @RequestParam(value = "sortBy", defaultValue = "firstName") String sortBy,
+            @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy) {
         return userService.getAllUsers(pageNo, limit, sortBy, orderBy);
     }
 

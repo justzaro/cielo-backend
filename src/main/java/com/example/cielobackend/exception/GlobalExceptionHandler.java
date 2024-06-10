@@ -34,4 +34,15 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(InvalidOrderByException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestExceptions(Exception e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setTimestamp(LocalDateTime.now());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 }

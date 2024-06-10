@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/cielo/categories")
+@RequestMapping("${api.basePath}/categories")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;

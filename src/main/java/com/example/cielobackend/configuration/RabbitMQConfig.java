@@ -16,6 +16,8 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.images-exchange.name}")
     private String imagesExchange;
 
+    @Value("${rabbitmq.image-user-mapping-q.name}")
+    private String imageUserMappingQueue;
     @Value("${rabbitmq.image-listing-mapping-q.name}")
     private String imageListingMappingQueue;
     @Value("${rabbitmq.image-category-mapping-q.name}")
@@ -24,7 +26,12 @@ public class RabbitMQConfig {
     private String imageListingMappingDlq;
     @Value("${rabbitmq.image-category-mapping-dlq.name}")
     private String imageCategoryMappingDlq;
+    @Value("${rabbitmq.image-user-mapping-dlq.name}")
+    private String imageUserMappingDlq;
 
+
+    @Value("${rabbitmq.image-user-mapping-q.routing-key}")
+    private String imageUserMappingQueueRoutingKey;
     @Value("${rabbitmq.image-listing-mapping-q.routing-key}")
     private String imageListingMappingQueueRoutingKey;
     @Value("${rabbitmq.image-category-mapping-q.routing-key}")
@@ -33,6 +40,8 @@ public class RabbitMQConfig {
     private String imageListingMappingDlqRoutingKey;
     @Value("${rabbitmq.image-category-mapping-dlq.routing-key}")
     private String imageCategoryMappingDlqRoutingKey;
+    @Value("${rabbitmq.image-user-mapping-dlq.routing-key}")
+    private String imageUserMappingDlqRoutingKey;
 
     @Bean
     public SimpleMessageConverter converter() {
@@ -44,12 +53,15 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue imageToListingMappingQueue() {
+    public Queue imageUserMappingQueue() {
+        return new Queue(imageUserMappingQueue, false);
+    }
+    @Bean
+    public Queue imageListingMappingQueue() {
         return new Queue(imageListingMappingQueue, false);
     }
-
     @Bean
-    public Queue imageToCategoryMappingQueue() {
+    public Queue imageCategoryMappingQueue() {
         return new Queue(imageCategoryMappingQueue, false);
     }
 
@@ -64,24 +76,39 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue userDeadLetterQueue() {
+        return new Queue(imageUserMappingDlq, true);
+    }
+
+
+    @Bean
     public TopicExchange imagesExchange() {
         return new TopicExchange(imagesExchange);
     }
 
+
     @Bean
-    public Binding bindingImageToListingMappingQueue(Queue imageToListingMappingQueue, TopicExchange imagesExchange) {
+    public Binding bindingImageUserMappingQueue(Queue imageUserMappingQueue, TopicExchange imagesExchange) {
         return BindingBuilder
-               .bind(imageToListingMappingQueue)
+               .bind(imageUserMappingQueue)
+               .to(imagesExchange)
+               .with(imageUserMappingQueueRoutingKey);
+    }
+
+    @Bean
+    public Binding bindingImageListingMappingQueue(Queue imageListingMappingQueue, TopicExchange imagesExchange) {
+        return BindingBuilder
+               .bind(imageListingMappingQueue)
                .to(imagesExchange)
                .with(imageListingMappingQueueRoutingKey);
     }
 
     @Bean
-    public Binding bindingImageToCategoryMappingQueue(Queue imageToCategoryMappingQueue, TopicExchange imagesExchange) {
+    public Binding bindingImageCategoryMappingQueue(Queue imageCategoryMappingQueue, TopicExchange imagesExchange) {
         return BindingBuilder
-                .bind(imageToCategoryMappingQueue)
-                .to(imagesExchange)
-                .with(imageCategoryMappingQueueRoutingKey);
+               .bind(imageCategoryMappingQueue)
+               .to(imagesExchange)
+               .with(imageCategoryMappingQueueRoutingKey);
     }
 
     @Bean
@@ -98,5 +125,13 @@ public class RabbitMQConfig {
                 .bind(categoryDeadLetterQueue)
                 .to(imagesExchange)
                 .with(imageCategoryMappingDlqRoutingKey);
+    }
+
+    @Bean
+    public Binding bindingUserDeadLetterQueue(Queue userDeadLetterQueue, TopicExchange imagesExchange) {
+        return BindingBuilder
+                .bind(userDeadLetterQueue)
+                .to(imagesExchange)
+                .with(imageUserMappingDlqRoutingKey);
     }
 }

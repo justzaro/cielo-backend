@@ -3,19 +3,21 @@ package com.example.cielobackend.service.implementation;
 import com.example.cielobackend.dto.*;
 import com.example.cielobackend.exception.ResourceDoesNotExistException;
 import com.example.cielobackend.model.*;
-import com.example.cielobackend.repository.CategoryRepository;
-import com.example.cielobackend.repository.ListingDetailRepository;
-import com.example.cielobackend.repository.ListingDetailValueRepository;
-import com.example.cielobackend.repository.ListingRepository;
+import com.example.cielobackend.repository.*;
 import com.example.cielobackend.service.ListingDetailService;
 import com.example.cielobackend.service.ListingService;
 
+import com.example.cielobackend.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 
 import org.modelmapper.ModelMapper;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.example.cielobackend.common.ExceptionMessages.*;
 
@@ -36,6 +39,7 @@ public class ListingServiceImpl implements ListingService {
     private String deletedImagesQueueRoutingKey;
     private final ModelMapper modelMapper;
     private final RabbitTemplate rabbitTemplate;
+    private final UserRepository userRepository;
     private final ListingRepository listingRepository;
     private final CategoryRepository categoryRepository;
     private final ListingDetailService listingDetailService;
@@ -43,14 +47,20 @@ public class ListingServiceImpl implements ListingService {
     private final ListingDetailValueRepository listingDetailValueRepository;
 
     @Override
-    public List<ListingDtoResponse> getAllListings() {
-        return listingRepository
-                .findAll()
-                .stream()
-                .map(listing -> modelMapper.map(listing, ListingDtoResponse.class))
-                .peek(this::setSubcategoriesList)
-                .peek(this::setSelectedValuesList)
-                .toList();
+    public Page<ListingDtoResponse> getAllListings(Integer pageNo, Integer limit,
+                                                   String sortBy, String orderBy) {
+        Pageable pageable = PaginationUtils.createPageable(pageNo, limit, sortBy, orderBy);
+
+        Page<ListingDtoResponse> resultPage = listingRepository
+                .findAll(pageable)
+                .map(listing -> {
+                    ListingDtoResponse dto = modelMapper.map(listing, ListingDtoResponse.class);
+                    setSubcategoriesList(dto);
+                    setSelectedValuesList(dto);
+                    return dto;
+                });
+
+        return resultPage.getContent().size() > 0 ? resultPage : Page.empty();
     }
 
     public ListingDtoResponse getListingById(long id) {
@@ -60,8 +70,65 @@ public class ListingServiceImpl implements ListingService {
         ListingDtoResponse listingResponse = modelMapper.map(listing, ListingDtoResponse.class);
         setSubcategoriesList(listingResponse);
         setSelectedValuesList(listingResponse);
-
         return listingResponse;
+    }
+
+    public Page<ListingDtoResponse> getAllFavouriteListingsForUser(long userId,
+                                                                   Integer pageNo, Integer limit,
+                                                                   String sortBy, String orderBy) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
+        System.out.println(user.getFavouriteListings().size());
+        Pageable pageable = PaginationUtils.createPageable(pageNo, limit, sortBy, orderBy);
+
+        List<Long> favoriteListingIds = user.getFavouriteListings().stream()
+                .map(Listing::getId)
+                .collect(Collectors.toList());
+
+        Page<ListingDtoResponse> resultPage = listingRepository
+                .findAllByUserAndIdIn(user, favoriteListingIds, pageable)
+                .map(listing -> {
+                    ListingDtoResponse response = modelMapper.map(listing, ListingDtoResponse.class);
+                    setSubcategoriesList(response);
+                    setSelectedValuesList(response);
+                    return response;
+                });
+
+        return resultPage.getContent().size() > 0 ? resultPage : Page.empty();
+    }
+
+
+    @Override
+    public Page<ListingDtoResponse> getAllListingsForUser(long userId,
+                                                          Integer pageNo, Integer limit,
+                                                          String sortBy, String orderBy) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
+
+        Pageable pageable = PaginationUtils.createPageable(pageNo, limit, sortBy, orderBy);
+
+        Page<ListingDtoResponse> resultPage = listingRepository
+                .findAllByUser(user, pageable)
+                .map(listing -> {
+                    ListingDtoResponse response = modelMapper.map(listing, ListingDtoResponse.class);
+                    setSubcategoriesList(response);
+                    setSelectedValuesList(response);
+                    return response;
+                });
+
+        return resultPage.getContent().size() > 0 ? resultPage : Page.empty();
+    }
+
+    @Override
+    public void addListingToFavourites(long listingId, long userId) {
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
+
+        user.getFavouriteListings().add(listing);
+        userRepository.save(user);
     }
 
     private void setSelectedValuesList(ListingDtoResponse listing) {
@@ -96,11 +163,14 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
-    public ListingDtoResponse addListing(ListingDto listingDto) {
+    public ListingDtoResponse addListing(ListingDto listingDto, long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
         Listing listing = modelMapper.map(listingDto, Listing.class);
 
         listing.setListedAt(LocalDateTime.now());
         listing.setLastUpdatedAt(LocalDateTime.now());
+        listing.setUser(user);
 
         listing = listingRepository.save(listing);
 

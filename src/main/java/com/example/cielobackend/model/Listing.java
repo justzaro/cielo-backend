@@ -8,6 +8,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -84,4 +85,17 @@ public class Listing {
 
     @ManyToMany(mappedBy = "favouriteListings")
     private Set<User> favouritedBy;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Listing listing = (Listing) o;
+        return Objects.equals(id, listing.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
