@@ -32,6 +32,9 @@ public class Listing {
     @Column(name = "contact_name", nullable = false)
     private String contactName;
 
+    @Column(name = "isFree")
+    private Boolean isFree;
+
     @Column(name = "price_is_negotiable")
     private Boolean priceIsNegotiable;
 
@@ -76,6 +79,10 @@ public class Listing {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "city_id")
+    private City city;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<ListingDetail> details;

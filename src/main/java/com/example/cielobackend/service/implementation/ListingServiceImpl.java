@@ -46,9 +46,11 @@ public class ListingServiceImpl implements ListingService {
     private final ListingDetailRepository listingDetailRepository;
     private final ListingDetailValueRepository listingDetailValueRepository;
 
+
+
     @Override
-    public Page<ListingDtoResponse> getAllListings(Integer pageNo, Integer limit,
-                                                   String sortBy, String orderBy) {
+    public Page<ListingDtoResponse> getListings(Integer pageNo, Integer limit,
+                                                String sortBy, String orderBy) {
         Pageable pageable = PaginationUtils.createPageable(pageNo, limit, sortBy, orderBy);
 
         Page<ListingDtoResponse> resultPage = listingRepository
@@ -78,7 +80,7 @@ public class ListingServiceImpl implements ListingService {
                                                                    String sortBy, String orderBy) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
-        System.out.println(user.getFavouriteListings().size());
+
         Pageable pageable = PaginationUtils.createPageable(pageNo, limit, sortBy, orderBy);
 
         List<Long> favoriteListingIds = user.getFavouriteListings().stream()
@@ -99,9 +101,9 @@ public class ListingServiceImpl implements ListingService {
 
 
     @Override
-    public Page<ListingDtoResponse> getAllListingsForUser(long userId,
-                                                          Integer pageNo, Integer limit,
-                                                          String sortBy, String orderBy) {
+    public Page<ListingDtoResponse> getAllListingsByUser(long userId,
+                                                         Integer pageNo, Integer limit,
+                                                         String sortBy, String orderBy) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
 

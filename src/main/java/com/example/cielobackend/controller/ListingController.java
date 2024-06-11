@@ -12,8 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("${api.basePath}/listings")
 @RequiredArgsConstructor
@@ -31,36 +29,7 @@ public class ListingController {
             @RequestParam(value = "limit", defaultValue = "20") @Min(1) @Max(20)  Integer limit,
             @RequestParam(value = "sortBy", defaultValue = "listedAt") String sortBy,
             @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy) {
-        return listingService.getAllListings(pageNo, limit, sortBy, orderBy);
-    }
-
-    @GetMapping("/users/{id}")
-    public Page<ListingDtoResponse> getAllListingForUser(
-            @PathVariable long id,
-            @RequestParam(value = "pageNo", defaultValue = "1") @Min(1) Integer pageNo,
-            @RequestParam(value = "limit", defaultValue = "10") @Min(1) @Max(20)  Integer limit,
-            @RequestParam(value = "sortBy", defaultValue = "listedAt") String sortBy,
-            @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy) {
-        return listingService.getAllListingsForUser(id, pageNo, limit, sortBy, orderBy);
-    }
-
-    @GetMapping("/favourites")
-    public Page<ListingDtoResponse> getAllFavouriteListingForUser(
-            @RequestParam("userId") long userId,
-            @RequestParam(value = "pageNo", defaultValue = "1") @Min(1) Integer pageNo,
-            @RequestParam(value = "limit", defaultValue = "10") @Min(1) @Max(20)  Integer limit,
-            @RequestParam(value = "sortBy", defaultValue = "listedAt") String sortBy,
-            @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy) {
-        return listingService.getAllFavouriteListingsForUser(userId, pageNo, limit, sortBy, orderBy);
-    }
-
-    @PostMapping("/{listingId}/favourites")
-    public ResponseEntity<Void> addListingToFavourites(@PathVariable long listingId,
-                                                       @RequestParam("userId") long userId) {
-        listingService.addListingToFavourites(listingId, userId);
-        return ResponseEntity
-               .ok()
-               .build();
+        return listingService.getListings(pageNo, limit, sortBy, orderBy);
     }
 
     @PostMapping

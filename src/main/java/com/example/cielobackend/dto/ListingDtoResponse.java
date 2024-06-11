@@ -2,12 +2,8 @@ package com.example.cielobackend.dto;
 
 import com.example.cielobackend.common.enums.ListingType;
 import com.example.cielobackend.common.enums.QualityType;
-import com.example.cielobackend.model.Category;
-import com.example.cielobackend.model.ListingDetail;
-import com.example.cielobackend.model.ListingImage;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,6 +44,8 @@ public class ListingDtoResponse {
     private QualityType quality;
 
     private ListingType type;
+
+    private CityProvinceDtoResponse city;
 
     private CategoryDtoResponse category;
 
