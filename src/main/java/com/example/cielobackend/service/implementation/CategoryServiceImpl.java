@@ -95,14 +95,24 @@ public class CategoryServiceImpl implements CategoryService {
         return modelMapper.map(category, CategoryDtoResponse.class);
     }
 
-    public AttributeDtoResponse addAttribute(long categoryId, long attributeId) {
+    public AttributeDtoResponse addAttributeToCategory(long categoryId, long attributeId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
         Attribute attribute = attributeRepository.findById(attributeId)
-                .orElseThrow(() -> new ResourceDoesNotExistException("ddd"));
+                .orElseThrow(() -> new ResourceDoesNotExistException(ATTRIBUTE_DOES_NOT_EXIST));
         category.getAttributes().add(attribute);
         categoryRepository.save(category);
         return modelMapper.map(attribute, AttributeDtoResponse.class);
+    }
+
+    @Override
+    public void removeAttributeFromCategory(long categoryId, long attributeId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
+        Attribute attribute = attributeRepository.findById(attributeId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(ATTRIBUTE_DOES_NOT_EXIST));
+        category.getAttributes().remove(attribute);
+        categoryRepository.save(category);
     }
 
     @Override

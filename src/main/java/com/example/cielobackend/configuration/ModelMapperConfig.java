@@ -1,5 +1,6 @@
 package com.example.cielobackend.configuration;
 
+import com.example.cielobackend.dto.ListingDtoResponse;
 import com.example.cielobackend.dto.ListingDtoUpdate;
 import com.example.cielobackend.model.Listing;
 import org.modelmapper.ModelMapper;

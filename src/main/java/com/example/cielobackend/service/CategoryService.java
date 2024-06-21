@@ -3,7 +3,6 @@ package com.example.cielobackend.service;
 import com.example.cielobackend.dto.AttributeDtoResponse;
 import com.example.cielobackend.dto.CategoryDto;
 import com.example.cielobackend.dto.CategoryDtoResponse;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,6 +14,7 @@ public interface CategoryService {
    CategoryDtoResponse updateCategory(long id, CategoryDto categoryDto);
    void deleteCategory(long id);
    void setCategoryImageName(long id, String imageName);
-   AttributeDtoResponse addAttribute(long categoryId, long attributeId);
+   AttributeDtoResponse addAttributeToCategory(long categoryId, long attributeId);
+   void removeAttributeFromCategory(long categoryId, long attributeId);
    Long countAllListingsByCategory(long id);
 }

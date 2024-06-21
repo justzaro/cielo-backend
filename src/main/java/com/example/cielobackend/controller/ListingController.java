@@ -3,6 +3,7 @@ package com.example.cielobackend.controller;
 import com.example.cielobackend.dto.ListingDto;
 import com.example.cielobackend.dto.ListingDtoResponse;
 import com.example.cielobackend.dto.ListingDtoUpdate;
+import com.example.cielobackend.dto.ListingSearchParameters;
 import com.example.cielobackend.service.ListingService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -25,11 +26,12 @@ public class ListingController {
 
     @GetMapping
     public Page<ListingDtoResponse> getListings(
-            @RequestParam(value = "pageNo", defaultValue = "1") @Min(1) Integer pageNo,
+            @RequestParam(value = "page", defaultValue = "1") @Min(1) Integer pageNo,
             @RequestParam(value = "limit", defaultValue = "20") @Min(1) @Max(20)  Integer limit,
             @RequestParam(value = "sortBy", defaultValue = "listedAt") String sortBy,
-            @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy) {
-        return listingService.getListings(pageNo, limit, sortBy, orderBy);
+            @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy,
+            @RequestBody(required = false) ListingSearchParameters searchParameters) {
+        return listingService.getListings(searchParameters, pageNo, limit, sortBy, orderBy);
     }
 
     @PostMapping

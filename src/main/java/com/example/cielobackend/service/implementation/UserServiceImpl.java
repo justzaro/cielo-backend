@@ -23,7 +23,6 @@ import static com.example.cielobackend.common.ExceptionMessages.*;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
@@ -31,15 +30,13 @@ public class UserServiceImpl implements UserService {
     public UserDtoResponse getUser(long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
-        System.out.println(user.getFavouriteListings().size());
-        System.out.println(user.getId());
         return modelMapper.map(user, UserDtoResponse.class);
     }
 
     @Override
-    public Page<UserDtoResponse> getAllUsers(Integer pageNo, Integer limit,
+    public Page<UserDtoResponse> getAllUsers(Integer page, Integer limit,
                                              String sortBy, String orderBy) {
-        Pageable pageable = PaginationUtils.createPageable(pageNo, limit, sortBy, orderBy);
+        Pageable pageable = PaginationUtils.createPageable(page, limit, sortBy, orderBy);
 
         Page<UserDtoResponse> resultPage = userRepository
                 .findAll(pageable)

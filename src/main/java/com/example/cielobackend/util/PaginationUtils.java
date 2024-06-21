@@ -18,8 +18,8 @@ public class PaginationUtils {
         }
     }
 
-    public static Pageable createPageable(Integer pageNo, Integer limit, String sortBy, String orderBy) {
+    public static Pageable createPageable(Integer page, Integer limit, String sortBy, String orderBy) {
         Sort sortingOrder = getSortOrder(sortBy, orderBy);
-        return PageRequest.of(pageNo - 1, limit, sortingOrder);
+        return PageRequest.of(page - 1, limit, sortingOrder);
     }
 }

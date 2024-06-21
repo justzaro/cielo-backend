@@ -22,7 +22,7 @@ public class Attribute {
     @OneToMany(mappedBy = "attribute")
     private List<ListingDetail> listingDetails;
 
-    @OneToMany(mappedBy = "attribute", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<AttributeValue> attributeValues;
 
     @ManyToMany(mappedBy = "attributes")

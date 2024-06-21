@@ -4,13 +4,11 @@ import com.example.cielobackend.dto.AttributeDtoResponse;
 import com.example.cielobackend.dto.CategoryDto;
 import com.example.cielobackend.dto.CategoryDtoResponse;
 import com.example.cielobackend.service.CategoryService;
-import jakarta.persistence.PostPersist;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -43,7 +41,7 @@ public class CategoryController {
     @PostMapping("/{categoryId}/attributes/{attributeId}")
     public AttributeDtoResponse addAttribute(@PathVariable long categoryId,
                                              @PathVariable long attributeId) {
-        return categoryService.addAttribute(categoryId, attributeId);
+        return categoryService.addAttributeToCategory(categoryId, attributeId);
     }
 
     @PutMapping("/{id}")
@@ -56,6 +54,15 @@ public class CategoryController {
     public CategoryDtoResponse renameCategory(@PathVariable("id") long id,
                                               @RequestBody String name) {
         return categoryService.renameCategory(id, name);
+    }
+
+    @DeleteMapping("/{categoryId}/attributes/{attributeId}")
+    public ResponseEntity<Void> removeAttributeFromCategory(@PathVariable long categoryId,
+                                                            @PathVariable long attributeId) {
+        categoryService.removeAttributeFromCategory(categoryId, attributeId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
     @DeleteMapping("/{id}")

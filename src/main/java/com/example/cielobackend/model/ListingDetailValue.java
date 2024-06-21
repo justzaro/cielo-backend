@@ -16,7 +16,7 @@ public class ListingDetailValue {
 
     @ManyToOne
     @JoinColumn(name = "listing_detail_id")
-    private ListingDetail listingDetailValue;
+    private ListingDetail listingDetail;
 
     @ManyToOne
     @JoinColumn(name = "attribute_value_id")

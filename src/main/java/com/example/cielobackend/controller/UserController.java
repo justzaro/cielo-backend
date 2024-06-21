@@ -27,31 +27,31 @@ public class UserController {
 
     @GetMapping
     private Page<UserDtoResponse> getUsers(
-            @RequestParam(value = "pageNo", defaultValue = "1") @Min(1) Integer pageNo,
+            @RequestParam(value = "page", defaultValue = "1") @Min(1) Integer page,
             @RequestParam(value = "limit", defaultValue = "10") @Min(1) @Max(20) Integer limit,
             @RequestParam(value = "sortBy", defaultValue = "firstName") String sortBy,
             @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy) {
-        return userService.getAllUsers(pageNo, limit, sortBy, orderBy);
+        return userService.getAllUsers(page, limit, sortBy, orderBy);
     }
 
     @GetMapping("/{id}/listings")
     public Page<ListingDtoResponse> getAllListingByUser(
             @PathVariable long id,
-            @RequestParam(value = "pageNo", defaultValue = "1") @Min(1) Integer pageNo,
+            @RequestParam(value = "page", defaultValue = "1") @Min(1) Integer page,
             @RequestParam(value = "limit", defaultValue = "10") @Min(1) @Max(20)  Integer limit,
             @RequestParam(value = "sortBy", defaultValue = "listedAt") String sortBy,
             @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy) {
-        return listingService.getAllListingsByUser(id, pageNo, limit, sortBy, orderBy);
+        return listingService.getAllListingsByUser(id, page, limit, sortBy, orderBy);
     }
 
     @GetMapping("/{id}/listings/favourites")
     public Page<ListingDtoResponse> getAllFavouriteListingForUser(
             @PathVariable long id,
-            @RequestParam(value = "pageNo", defaultValue = "1") @Min(1) Integer pageNo,
+            @RequestParam(value = "page", defaultValue = "1") @Min(1) Integer page,
             @RequestParam(value = "limit", defaultValue = "10") @Min(1) @Max(20)  Integer limit,
             @RequestParam(value = "sortBy", defaultValue = "listedAt") String sortBy,
             @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy) {
-        return listingService.getAllFavouriteListingsForUser(id, pageNo, limit, sortBy, orderBy);
+        return listingService.getAllFavouriteListingsForUser(id, page, limit, sortBy, orderBy);
     }
 
     @PostMapping("/{userId}/listings/{listingId}/favourites")

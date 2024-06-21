@@ -1,5 +1,6 @@
 package com.example.cielobackend.controller;
 
+import com.example.cielobackend.dto.ProvinceCitiesDtoResponse;
 import com.example.cielobackend.dto.ProvinceDtoResponse;
 import com.example.cielobackend.service.ProvinceService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ public class ProvinceController {
     private final ProvinceService provinceService;
 
     @GetMapping
-    public List<ProvinceDtoResponse> getAllProvinces() {
+    public List<ProvinceCitiesDtoResponse> getAllProvinces() {
         return provinceService.getAllProvinces();
     }
 }

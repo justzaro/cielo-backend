@@ -4,10 +4,14 @@ import com.example.cielobackend.dto.*;
 import com.example.cielobackend.exception.ResourceDoesNotExistException;
 import com.example.cielobackend.model.*;
 import com.example.cielobackend.repository.*;
+import com.example.cielobackend.service.AttributeService;
 import com.example.cielobackend.service.ListingDetailService;
 import com.example.cielobackend.service.ListingService;
 
+import com.example.cielobackend.util.ListingSearchParametersSpecification;
 import com.example.cielobackend.util.PaginationUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 
 import org.modelmapper.ModelMapper;
@@ -20,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,6 +43,8 @@ public class ListingServiceImpl implements ListingService {
     @Value("${rabbitmq.deleted-images-q.routing-key}")
     private String deletedImagesQueueRoutingKey;
     private final ModelMapper modelMapper;
+    @PersistenceContext
+    private final EntityManager entityManager;
     private final RabbitTemplate rabbitTemplate;
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
@@ -46,46 +53,54 @@ public class ListingServiceImpl implements ListingService {
     private final ListingDetailRepository listingDetailRepository;
     private final ListingDetailValueRepository listingDetailValueRepository;
 
-
-
     @Override
-    public Page<ListingDtoResponse> getListings(Integer pageNo, Integer limit,
+    public Page<ListingDtoResponse> getListings(ListingSearchParameters searchParameters,
+                                                Integer page, Integer limit,
                                                 String sortBy, String orderBy) {
-        Pageable pageable = PaginationUtils.createPageable(pageNo, limit, sortBy, orderBy);
+        Pageable pageable = PaginationUtils.createPageable(page, limit, sortBy, orderBy);
+        Page<Listing> resultPage;
 
-        Page<ListingDtoResponse> resultPage = listingRepository
-                .findAll(pageable)
-                .map(listing -> {
-                    ListingDtoResponse dto = modelMapper.map(listing, ListingDtoResponse.class);
-                    setSubcategoriesList(dto);
-                    setSelectedValuesList(dto);
-                    return dto;
-                });
+        if (searchParameters == null) {
+            resultPage = listingRepository.findAll(pageable);
+        } else {
+            ListingSearchParametersSpecification specification = new ListingSearchParametersSpecification(searchParameters);
+            resultPage = listingRepository.findAll(specification, pageable);
+        }
 
-        return resultPage.getContent().size() > 0 ? resultPage : Page.empty();
+        Page<ListingDtoResponse> dtoResultPage = resultPage.map(listing -> {
+            ListingDtoResponse dto = modelMapper.map(listing, ListingDtoResponse.class);
+            setSubcategoriesList(dto);
+            setSelectedValuesList(dto);
+            return dto;
+        });
+
+        return dtoResultPage.getContent().size() > 0 ? dtoResultPage : Page.empty();
     }
+
 
     public ListingDtoResponse getListingById(long id) {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
-
         ListingDtoResponse listingResponse = modelMapper.map(listing, ListingDtoResponse.class);
+
         setSubcategoriesList(listingResponse);
         setSelectedValuesList(listingResponse);
+
         return listingResponse;
     }
 
     public Page<ListingDtoResponse> getAllFavouriteListingsForUser(long userId,
-                                                                   Integer pageNo, Integer limit,
+                                                                   Integer page, Integer limit,
                                                                    String sortBy, String orderBy) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
 
-        Pageable pageable = PaginationUtils.createPageable(pageNo, limit, sortBy, orderBy);
+        Pageable pageable = PaginationUtils.createPageable(page, limit, sortBy, orderBy);
 
-        List<Long> favoriteListingIds = user.getFavouriteListings().stream()
-                .map(Listing::getId)
-                .collect(Collectors.toList());
+        List<Long> favoriteListingIds = user.getFavouriteListings()
+                                            .stream()
+                                            .map(Listing::getId)
+                                            .collect(Collectors.toList());
 
         Page<ListingDtoResponse> resultPage = listingRepository
                 .findAllByUserAndIdIn(user, favoriteListingIds, pageable)
@@ -102,12 +117,12 @@ public class ListingServiceImpl implements ListingService {
 
     @Override
     public Page<ListingDtoResponse> getAllListingsByUser(long userId,
-                                                         Integer pageNo, Integer limit,
+                                                         Integer page, Integer limit,
                                                          String sortBy, String orderBy) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
 
-        Pageable pageable = PaginationUtils.createPageable(pageNo, limit, sortBy, orderBy);
+        Pageable pageable = PaginationUtils.createPageable(page, limit, sortBy, orderBy);
 
         Page<ListingDtoResponse> resultPage = listingRepository
                 .findAllByUser(user, pageable)
@@ -175,10 +190,11 @@ public class ListingServiceImpl implements ListingService {
         listing.setUser(user);
 
         listing = listingRepository.save(listing);
-
         setListingDetails(listing, listingDto.getDetails());
 
-        return modelMapper.map(listing, ListingDtoResponse.class);
+        entityManager.clear();
+
+        return getListingById(listing.getId());
     }
 
     @Override
@@ -193,7 +209,9 @@ public class ListingServiceImpl implements ListingService {
 
         listing.setLastUpdatedAt(LocalDateTime.now());
         setListingDetails(listing, listingDto.getDetails());
-        return getListingById(listing.getId());
+
+        entityManager.clear();
+        return getListingById(id);
     }
 
     private void handleCategoryChange(ListingDtoUpdate listingDto, Listing listing) {
@@ -208,12 +226,13 @@ public class ListingServiceImpl implements ListingService {
         for (ListingDetailDto detail : details) {
             ListingDetail listingDetail = new ListingDetail();
             listingDetail.setListing(listing);
+            listingDetail.setValue(detail.getValue());
             listingDetail.setAttribute(modelMapper.map(detail.getAttribute(), Attribute.class));
             listingDetail = listingDetailRepository.save(listingDetail);
-
+            System.out.println(listingDetail.getValue());
             for (ListingDetailValueDto detailValue : detail.getDetailValues()) {
                 ListingDetailValue listingDetailValue = new ListingDetailValue();
-                listingDetailValue.setListingDetailValue(listingDetail);
+                listingDetailValue.setListingDetail(listingDetail);
                 listingDetailValue.setAttributeValue(modelMapper.map(detailValue.getAttributeValue(), AttributeValue.class));
                 listingDetailValueRepository.save(listingDetailValue);
             }

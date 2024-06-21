@@ -18,5 +18,4 @@ import java.util.Optional;
 public interface ListingRepository extends JpaRepository<Listing, Long>, JpaSpecificationExecutor<Listing> {
     Page<Listing> findAllByUser(User user, Pageable pageable);
     Page<Listing> findAllByUserAndIdIn(User user, List<Long> listingIds, Pageable pageable);
-
 }
