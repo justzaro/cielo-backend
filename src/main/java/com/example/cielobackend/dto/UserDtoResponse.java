@@ -21,6 +21,8 @@ public class UserDtoResponse {
 
     private String address;
 
+    private String profilePictureName;
+
     private LocalDate dateOfBirth;
 
     private List<ListingDtoResponse> listings;

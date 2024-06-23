@@ -4,12 +4,12 @@ import com.example.cielobackend.dto.*;
 import com.example.cielobackend.exception.ResourceDoesNotExistException;
 import com.example.cielobackend.model.*;
 import com.example.cielobackend.repository.*;
-import com.example.cielobackend.service.AttributeService;
 import com.example.cielobackend.service.ListingDetailService;
 import com.example.cielobackend.service.ListingService;
 
-import com.example.cielobackend.util.ListingSearchParametersSpecification;
+import com.example.cielobackend.util.AbstractSpecification;
 import com.example.cielobackend.util.PaginationUtils;
+import com.example.cielobackend.util.SpecificationFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -19,18 +19,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.cielobackend.common.ExceptionMessages.*;
@@ -49,25 +43,18 @@ public class ListingServiceImpl implements ListingService {
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
     private final CategoryRepository categoryRepository;
+    private final SpecificationFactory specificationFactory;
     private final ListingDetailService listingDetailService;
     private final ListingDetailRepository listingDetailRepository;
     private final ListingDetailValueRepository listingDetailValueRepository;
 
     @Override
-    public Page<ListingDtoResponse> getListings(ListingSearchParameters searchParameters,
-                                                Integer page, Integer limit,
+    public Page<ListingDtoResponse> getListings(Map<String, String[]> params,
+                                                int categoryId, int page, int limit,
                                                 String sortBy, String orderBy) {
-        Pageable pageable = PaginationUtils.createPageable(page, limit, sortBy, orderBy);
-        Page<Listing> resultPage;
+        Page<Listing> listingPage = getPage(categoryId, page, limit, sortBy, orderBy, params);
 
-        if (searchParameters == null) {
-            resultPage = listingRepository.findAll(pageable);
-        } else {
-            ListingSearchParametersSpecification specification = new ListingSearchParametersSpecification(searchParameters);
-            resultPage = listingRepository.findAll(specification, pageable);
-        }
-
-        Page<ListingDtoResponse> dtoResultPage = resultPage.map(listing -> {
+        Page<ListingDtoResponse> dtoResultPage = listingPage.map(listing -> {
             ListingDtoResponse dto = modelMapper.map(listing, ListingDtoResponse.class);
             setSubcategoriesList(dto);
             setSelectedValuesList(dto);
@@ -77,6 +64,14 @@ public class ListingServiceImpl implements ListingService {
         return dtoResultPage.getContent().size() > 0 ? dtoResultPage : Page.empty();
     }
 
+    private Page<Listing> getPage(int categoryId, int page, int limit, String sortBy, String orderBy, Map<String, String[]> params) {
+        Pageable pageable = PaginationUtils.createPageable(page, limit, sortBy, orderBy);
+        List<Integer> childCategoriesIds = categoryRepository.findAllChildCategories(categoryId);
+        String categoryName = categoryRepository.findRootCategoryOfGivenCategoryId(categoryId);
+
+        AbstractSpecification<Listing> specification = specificationFactory.getSpecification(categoryName, params, childCategoriesIds);
+        return listingRepository.findAll(specification, pageable);
+    }
 
     public ListingDtoResponse getListingById(long id) {
         Listing listing = listingRepository.findById(id)
@@ -216,7 +211,7 @@ public class ListingServiceImpl implements ListingService {
 
     private void handleCategoryChange(ListingDtoUpdate listingDto, Listing listing) {
         if (!Objects.equals(listingDto.getCategory().getId(), listing.getCategory().getId())) {
-            Category newCategory = categoryRepository.findById(listing.getId())
+            Category newCategory = categoryRepository.findById(listingDto.getCategory().getId())
                     .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
             listing.setCategory(newCategory);
         }
@@ -225,15 +220,19 @@ public class ListingServiceImpl implements ListingService {
     private void setListingDetails(Listing listing, List<ListingDetailDto> details) {
         for (ListingDetailDto detail : details) {
             ListingDetail listingDetail = new ListingDetail();
+
             listingDetail.setListing(listing);
             listingDetail.setValue(detail.getValue());
+
             listingDetail.setAttribute(modelMapper.map(detail.getAttribute(), Attribute.class));
             listingDetail = listingDetailRepository.save(listingDetail);
-            System.out.println(listingDetail.getValue());
+
             for (ListingDetailValueDto detailValue : detail.getDetailValues()) {
                 ListingDetailValue listingDetailValue = new ListingDetailValue();
+
                 listingDetailValue.setListingDetail(listingDetail);
                 listingDetailValue.setAttributeValue(modelMapper.map(detailValue.getAttributeValue(), AttributeValue.class));
+
                 listingDetailValueRepository.save(listingDetailValue);
             }
         }

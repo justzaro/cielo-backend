@@ -1,6 +1,5 @@
 package com.example.cielobackend.service.implementation;
 
-import com.dropbox.core.DbxException;
 import com.example.cielobackend.dto.AttributeDtoResponse;
 import com.example.cielobackend.dto.CategoryDto;
 import com.example.cielobackend.dto.CategoryDtoResponse;
@@ -12,23 +11,12 @@ import com.example.cielobackend.repository.AttributeRepository;
 import com.example.cielobackend.repository.CategoryRepository;
 import com.example.cielobackend.service.CategoryService;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.example.cielobackend.common.ExceptionMessages.*;
@@ -133,7 +121,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Long countAllListingsByCategory(long id) {
-        return categoryRepository.countAllByCategoryId(id);
+        return categoryRepository.countAllById(id);
     }
 
     private void sendCategoryImageToDeletionQueue(String imageName) {
