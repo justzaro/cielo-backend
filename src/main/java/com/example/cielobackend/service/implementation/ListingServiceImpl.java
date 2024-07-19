@@ -7,19 +7,22 @@ import com.example.cielobackend.repository.*;
 import com.example.cielobackend.service.ListingDetailService;
 import com.example.cielobackend.service.ListingService;
 
-import com.example.cielobackend.util.AbstractSpecification;
-import com.example.cielobackend.util.PaginationUtils;
-import com.example.cielobackend.util.SpecificationFactory;
+import com.example.cielobackend.pagination.AbstractSpecification;
+import com.example.cielobackend.pagination.PaginationUtils;
+import com.example.cielobackend.pagination.SpecificationFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -47,12 +50,25 @@ public class ListingServiceImpl implements ListingService {
     private final ListingDetailService listingDetailService;
     private final ListingDetailRepository listingDetailRepository;
     private final ListingDetailValueRepository listingDetailValueRepository;
+    private final ApplicationContext applicationContext;
 
     @Override
     public Page<ListingDtoResponse> getListings(Map<String, String[]> params,
                                                 int categoryId, int page, int limit,
                                                 String sortBy, String orderBy) {
-        Page<Listing> listingPage = getPage(categoryId, page, limit, sortBy, orderBy, params);
+        String[] beanNames = applicationContext.getBeanNamesForType(JpaRepository.class);
+
+        for (String beanName : beanNames) {
+            System.out.println(beanName);
+        }
+        return getListingDtoResponsePage(params, categoryId, page, limit, sortBy, orderBy);
+    }
+
+    @NotNull
+    private Page<ListingDtoResponse> getListingDtoResponsePage(Map<String, String[]> params,
+                                                               int categoryId, int page, int limit,
+                                                               String sortBy, String orderBy) {
+        Page<Listing> listingPage = getListingPage(categoryId, page, limit, sortBy, orderBy, params);
 
         Page<ListingDtoResponse> dtoResultPage = listingPage.map(listing -> {
             ListingDtoResponse dto = modelMapper.map(listing, ListingDtoResponse.class);
@@ -64,7 +80,9 @@ public class ListingServiceImpl implements ListingService {
         return dtoResultPage.getContent().size() > 0 ? dtoResultPage : Page.empty();
     }
 
-    private Page<Listing> getPage(int categoryId, int page, int limit, String sortBy, String orderBy, Map<String, String[]> params) {
+    private Page<Listing> getListingPage(int categoryId, int page, int limit,
+                                         String sortBy, String orderBy,
+                                         Map<String, String[]> params) {
         Pageable pageable = PaginationUtils.createPageable(page, limit, sortBy, orderBy);
         List<Integer> childCategoriesIds = categoryRepository.findAllChildCategories(categoryId);
         String categoryName = categoryRepository.findRootCategoryOfGivenCategoryId(categoryId);
@@ -85,7 +103,7 @@ public class ListingServiceImpl implements ListingService {
     }
 
     public Page<ListingDtoResponse> getAllFavouriteListingsForUser(long userId,
-                                                                   Integer page, Integer limit,
+                                                                   int page, int limit,
                                                                    String sortBy, String orderBy) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
@@ -112,23 +130,16 @@ public class ListingServiceImpl implements ListingService {
 
     @Override
     public Page<ListingDtoResponse> getAllListingsByUser(long userId,
-                                                         Integer page, Integer limit,
+                                                         int categoryId, int page, int limit,
                                                          String sortBy, String orderBy) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new ResourceDoesNotExistException(USER_DOES_NOT_EXIST);
+        }
 
-        Pageable pageable = PaginationUtils.createPageable(page, limit, sortBy, orderBy);
+        Map<String, String[]> params = new HashMap<>();
+        params.put("userId", new String[]{String.valueOf(userId)});
 
-        Page<ListingDtoResponse> resultPage = listingRepository
-                .findAllByUser(user, pageable)
-                .map(listing -> {
-                    ListingDtoResponse response = modelMapper.map(listing, ListingDtoResponse.class);
-                    setSubcategoriesList(response);
-                    setSelectedValuesList(response);
-                    return response;
-                });
-
-        return resultPage.getContent().size() > 0 ? resultPage : Page.empty();
+        return getListingDtoResponsePage(params, categoryId, page, limit, sortBy, orderBy);
     }
 
     @Override
@@ -188,7 +199,6 @@ public class ListingServiceImpl implements ListingService {
         setListingDetails(listing, listingDto.getDetails());
 
         entityManager.clear();
-
         return getListingById(listing.getId());
     }
 
@@ -254,4 +264,6 @@ public class ListingServiceImpl implements ListingService {
                                           image.getName());
         }
     }
+
+
 }

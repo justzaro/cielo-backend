@@ -7,16 +7,12 @@ import com.example.cielobackend.exception.ResourceDoesNotExistException;
 import com.example.cielobackend.model.User;
 import com.example.cielobackend.repository.UserRepository;
 import com.example.cielobackend.service.UserService;
-import com.example.cielobackend.util.PaginationUtils;
+import com.example.cielobackend.pagination.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 import static com.example.cielobackend.common.ExceptionMessages.*;
 

@@ -1,4 +1,4 @@
-package com.example.cielobackend.util;
+package com.example.cielobackend.pagination;
 
 import com.example.cielobackend.exception.InvalidOrderByException;
 import org.springframework.data.domain.PageRequest;

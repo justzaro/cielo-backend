@@ -1,19 +1,26 @@
-package com.example.cielobackend.util;
+package com.example.cielobackend.pagination;
 
 import com.example.cielobackend.model.*;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class CarSpecification extends AbstractSpecification<Listing> {
-
+@NoArgsConstructor
+public class CarSpecification extends AbstractSpecification<Listing> implements SpecificationProvider {
     public CarSpecification(Map<String, String[]> parameters, List<Integer> childCategoryIds) {
         super(parameters, childCategoryIds);
     }
 
-    protected void addPredicates(List<Predicate> predicates, Root<Listing> root, CriteriaBuilder criteriaBuilder) {
+    @Override
+    public String getCategoryName() {
+        return "Autos, Caravans, Boats";
+    }
+
+    public void addPredicates(List<Predicate> predicates, Root<Listing> root, CriteriaBuilder criteriaBuilder) {
         addPredicate(predicates, "Eurostandard", getListParameter("eurostandard"), criteriaBuilder);
         addPredicate(predicates, "Doors", getListParameter("doors"), criteriaBuilder);
         addPredicate(predicates, "Engine count", getListParameter("engineCount"), criteriaBuilder);
@@ -31,5 +38,10 @@ public class CarSpecification extends AbstractSpecification<Listing> {
         addPredicate(predicates, "Others", getListParameter("others"), criteriaBuilder);
         addPredicate(predicates, "Heating", getListParameter("heating"), criteriaBuilder);
         addPredicate(predicates, "Type", getListParameter("type"), criteriaBuilder);
+    }
+
+    @Override
+    public AbstractSpecification<Listing> createSpecification(Map<String, String[]> parameters, List<Integer> childCategoryIds) {
+        return new CarSpecification(parameters, childCategoryIds);
     }
 }

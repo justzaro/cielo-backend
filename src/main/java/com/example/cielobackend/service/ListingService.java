@@ -17,10 +17,10 @@ public interface ListingService {
                                          String sortBy, String orderBy);
     void addListingToFavourites(long listingId, long userId);
     Page<ListingDtoResponse> getAllFavouriteListingsForUser(long userId,
-                                                            Integer page, Integer limit,
+                                                            int page, int limit,
                                                             String sortBy, String orderBy);
     Page<ListingDtoResponse> getAllListingsByUser(long userId,
-                                                  Integer page, Integer limit,
+                                                  int categoryId, int page, int limit,
                                                   String sortBy, String orderBy);
     ListingDtoResponse getListingById(long id);
     void deleteListing(long id);

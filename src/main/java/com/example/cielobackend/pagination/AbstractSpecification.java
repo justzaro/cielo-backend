@@ -1,20 +1,23 @@
-package com.example.cielobackend.util;
+package com.example.cielobackend.pagination;
 
 import com.example.cielobackend.model.*;
 import jakarta.persistence.criteria.*;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@NoArgsConstructor
 public abstract class AbstractSpecification<T> implements Specification<T> {
-    protected final Map<String, String[]> parameters;
-    protected final List<Integer> childCategoryIds;
-    protected Join<Listing, ListingDetail> joinDetails;
-    protected Join<ListingDetail, ListingDetailValue> joinDetailValues;
-    protected Join<ListingDetailValue, AttributeValue> joinAttributeValues;
-    protected Join<ListingDetail, Attribute> joinAttributes;
+    private Map<String, String[]> parameters;
+    private List<Integer> childCategoryIds;
+    private Join<Listing, ListingDetail> joinDetails;
+    private Join<ListingDetail, ListingDetailValue> joinDetailValues;
+    private Join<ListingDetailValue, AttributeValue> joinAttributeValues;
+    private Join<ListingDetail, Attribute> joinAttributes;
 
     public AbstractSpecification(Map<String, String[]> parameters, List<Integer> childCategoryIds) {
         this.parameters = parameters;
@@ -39,16 +42,20 @@ public abstract class AbstractSpecification<T> implements Specification<T> {
     }
 
     protected void addCommonPredicates(List<Predicate> predicates, Root<T> root, CriteriaBuilder criteriaBuilder) {
-        // Example: Adding minPrice and maxPrice predicates
         int minPrice = getIntParameter("minPrice", 0);
-        // Get maxPrice with default value 1000000
         int maxPrice = getIntParameter("maxPrice", 100000000);
 
-        // Add predicates using minPrice and maxPrice
         predicates.add(criteriaBuilder.between(root.get("price"), minPrice, maxPrice));
 
-        // Example: Adding predicate for category ID
-        predicates.add(root.get("category").get("id").in(childCategoryIds));
+        if (childCategoryIds != null && !childCategoryIds.isEmpty()) {
+            predicates.add(root.get("category").get("id").in(childCategoryIds));
+        }
+
+        if (parameters.containsKey("userId")) {
+            int userId = getIntParameter("userId", 0);
+            Predicate predicate = criteriaBuilder.equal(root.get("user").get("id"), userId);
+            predicates.add(predicate);
+        }
 
         String searchText = getStringParameter("searchText");
         if (searchText != null && !searchText.isEmpty()) {
@@ -61,7 +68,6 @@ public abstract class AbstractSpecification<T> implements Specification<T> {
     protected void addPredicate(List<Predicate> predicates,
                                 String attributeName, List<String> values,
                                 CriteriaBuilder criteriaBuilder) {
-
         if (values != null && !values.isEmpty()) {
             Predicate predicate = criteriaBuilder.and(
                     criteriaBuilder.equal(joinAttributes.get("name"), attributeName),
@@ -95,10 +101,9 @@ public abstract class AbstractSpecification<T> implements Specification<T> {
             try {
                 return Integer.parseInt(values[0]);
             } catch (NumberFormatException e) {
-                // Handle parsing error if needed
-                return defaultValue; // Return default value on error
+                return defaultValue;
             }
         }
-        return defaultValue; // Return default value if parameter is not present
+        return defaultValue;
     }
 }

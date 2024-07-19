@@ -10,6 +10,7 @@ import com.example.cielobackend.model.Category;
 import com.example.cielobackend.repository.AttributeRepository;
 import com.example.cielobackend.repository.CategoryRepository;
 import com.example.cielobackend.service.CategoryService;
+import com.example.cielobackend.service.DataValidationService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -30,13 +31,12 @@ public class CategoryServiceImpl implements CategoryService {
     private String deletedImagesQueueRoutingKey;
     private final RabbitTemplate rabbitTemplate;
     private final CategoryRepository categoryRepository;
-    private final AttributeRepository attributeRepository;
+    private final DataValidationService dataValidationService;
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
     public CategoryDtoResponse getCategoryById(long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
+        Category category = dataValidationService.getResourceOrThrow(Category.class, id, CATEGORY_DOES_NOT_EXIST);
         return modelMapper.map(category, CategoryDtoResponse.class);
     }
 
@@ -64,8 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryRepository.findByName(name).isPresent()) {
             throw new ResourceAlreadyExistsException(DUPLICATE_CATEGORY_NAME);
         }
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
+        Category category = dataValidationService.getResourceOrThrow(Category.class, id, CATEGORY_DOES_NOT_EXIST);
         category.setName(name);
         category = categoryRepository.save(category);
         return modelMapper.map(category, CategoryDtoResponse.class);
@@ -73,8 +72,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDtoResponse updateCategory(long id, CategoryDto categoryDto) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
+        Category category = dataValidationService.getResourceOrThrow(Category.class, id, CATEGORY_DOES_NOT_EXIST);
 
         category.setName(categoryDto.getName());
         category.setLevel(categoryDto.getLevel());
@@ -84,10 +82,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     public AttributeDtoResponse addAttributeToCategory(long categoryId, long attributeId) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
-        Attribute attribute = attributeRepository.findById(attributeId)
-                .orElseThrow(() -> new ResourceDoesNotExistException(ATTRIBUTE_DOES_NOT_EXIST));
+        Category category = dataValidationService.getResourceOrThrow(Category.class, categoryId, CATEGORY_DOES_NOT_EXIST);
+        Attribute attribute = dataValidationService.getResourceOrThrow(Attribute.class, attributeId, ATTRIBUTE_DOES_NOT_EXIST);
+
         category.getAttributes().add(attribute);
         categoryRepository.save(category);
         return modelMapper.map(attribute, AttributeDtoResponse.class);
@@ -95,10 +92,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void removeAttributeFromCategory(long categoryId, long attributeId) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
-        Attribute attribute = attributeRepository.findById(attributeId)
-                .orElseThrow(() -> new ResourceDoesNotExistException(ATTRIBUTE_DOES_NOT_EXIST));
+        Category category = dataValidationService.getResourceOrThrow(Category.class, categoryId, CATEGORY_DOES_NOT_EXIST);
+        Attribute attribute = dataValidationService.getResourceOrThrow(Attribute.class, attributeId, ATTRIBUTE_DOES_NOT_EXIST);
         category.getAttributes().remove(attribute);
         categoryRepository.save(category);
     }
@@ -113,8 +108,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
+        Category category = dataValidationService.getResourceOrThrow(Category.class, id, CATEGORY_DOES_NOT_EXIST);
         sendCategoryImageToDeletionQueue(category.getImageName());
         categoryRepository.delete(category);
     }

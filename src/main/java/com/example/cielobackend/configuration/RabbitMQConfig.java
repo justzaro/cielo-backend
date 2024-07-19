@@ -29,7 +29,6 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.image-user-mapping-dlq.name}")
     private String imageUserMappingDlq;
 
-
     @Value("${rabbitmq.image-user-mapping-q.routing-key}")
     private String imageUserMappingQueueRoutingKey;
     @Value("${rabbitmq.image-listing-mapping-q.routing-key}")
@@ -64,28 +63,23 @@ public class RabbitMQConfig {
     public Queue imageCategoryMappingQueue() {
         return new Queue(imageCategoryMappingQueue, false);
     }
-
     @Bean
     public Queue listingDeadLetterQueue() {
         return new Queue(imageListingMappingDlq, true);
     }
-
     @Bean
     public Queue categoryDeadLetterQueue() {
         return new Queue(imageCategoryMappingDlq, true);
     }
-
     @Bean
     public Queue userDeadLetterQueue() {
         return new Queue(imageUserMappingDlq, true);
     }
 
-
     @Bean
     public TopicExchange imagesExchange() {
         return new TopicExchange(imagesExchange);
     }
-
 
     @Bean
     public Binding bindingImageUserMappingQueue(Queue imageUserMappingQueue, TopicExchange imagesExchange) {

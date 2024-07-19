@@ -1,6 +1,7 @@
 package com.example.cielobackend.common;
 
 public class ExceptionMessages {
+    public static final String RESOURCE_DOES_NOT_EXIST = "Resource with this ID does not exist!";
     public static final String DUPLICATE_CATEGORY_NAME = "Category with this name already exists!";
     public static final String DUPLICATE_ATTRIBUTE_VALUE = "Duplicate attribute value!";
 

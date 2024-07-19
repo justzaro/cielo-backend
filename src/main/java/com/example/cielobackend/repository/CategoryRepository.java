@@ -64,7 +64,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     WITH RECURSIVE CategoryHierarchy AS (
     SELECT
         c.category_id, c.parent_category_id, c.name, c.level
-    FROM\s
+    FROM
         categories c
     WHERE
         c.category_id = :categoryId

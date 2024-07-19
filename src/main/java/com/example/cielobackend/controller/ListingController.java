@@ -4,7 +4,6 @@ import com.example.cielobackend.dto.ListingDto;
 import com.example.cielobackend.dto.ListingDtoResponse;
 import com.example.cielobackend.dto.ListingDtoUpdate;
 import com.example.cielobackend.service.ListingService;
-import com.example.cielobackend.util.SpecificationFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -21,7 +20,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ListingController {
     private final ListingService listingService;
-    private final SpecificationFactory specificationFactory;
 
     @GetMapping("/{id}")
     public ListingDtoResponse getListingById(@PathVariable long id) {
