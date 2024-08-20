@@ -37,8 +37,4 @@ application.properties
 
 ### Logs ###
 logs/cielo-backend.log
-<<<<<<< HEAD
 logs/cielo-backend.log.*.gz
-=======
-logs/cielo-backend.log.*.gz
->>>>>>> c3ba5c0da9add5c3c4b253b5e317d474f9f0797a
