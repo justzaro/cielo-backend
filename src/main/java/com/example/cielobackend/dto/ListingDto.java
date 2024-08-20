@@ -1,8 +1,14 @@
 package com.example.cielobackend.dto;
 
+import com.example.cielobackend.common.enums.ListingType;
+import com.example.cielobackend.common.enums.QualityType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -36,6 +42,10 @@ public class ListingDto {
     private Boolean isPremium = false;
 
     private Boolean isAutoRenewable = false;
+
+    private ListingType type;
+
+    private QualityType quality;
 
     @NotNull
     private CategoryDtoResponse category;

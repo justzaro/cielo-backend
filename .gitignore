@@ -34,3 +34,6 @@ build/
 
 ### Application properties ###
 application.properties
+
+### Logs ###
+logs/cielo-backend.log.*.gz

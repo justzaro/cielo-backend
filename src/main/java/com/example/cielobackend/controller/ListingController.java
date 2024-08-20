@@ -2,17 +2,21 @@ package com.example.cielobackend.controller;
 
 import com.example.cielobackend.dto.ListingDto;
 import com.example.cielobackend.dto.ListingDtoResponse;
+import com.example.cielobackend.dto.ListingDtoUpdate;
 import com.example.cielobackend.service.ListingService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.http.HttpResponse;
-import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/cielo/listings")
+@RequestMapping("${api.basePath}/listings")
 @RequiredArgsConstructor
 public class ListingController {
     private final ListingService listingService;
@@ -23,13 +27,28 @@ public class ListingController {
     }
 
     @GetMapping
-    public List<ListingDtoResponse> getAllListings() {
-        return listingService.getAllListings();
+    public Page<ListingDtoResponse> getListings(
+            @RequestParam(value = "categoryId", defaultValue = "0") @Min(0) int categoryId,
+            @RequestParam(value = "page", defaultValue = "1") @Min(1) int page,
+            @RequestParam(value = "limit", defaultValue = "20") @Min(1) @Max(20) int limit,
+            @RequestParam(value = "sortBy", defaultValue = "listedAt") String sortBy,
+            @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy,
+            HttpServletRequest httpServletRequest) {
+
+        Map<String, String[]> params = httpServletRequest.getParameterMap();
+        return listingService.getListings(params, categoryId, page, limit, sortBy, orderBy);
     }
 
     @PostMapping
-    public ListingDtoResponse addListing(@RequestBody @Valid ListingDto listingDto) {
-        return listingService.addListing(listingDto);
+    public ListingDtoResponse addListing(@RequestBody @Valid ListingDto listingDto,
+                                         @RequestParam("userId") long userId) {
+        return listingService.addListing(listingDto, userId);
+    }
+
+    @PutMapping("/{id}")
+    public ListingDtoResponse updateListing(@PathVariable long id,
+                                            @RequestBody @Valid ListingDtoUpdate listingDto) {
+        return listingService.updateListing(id, listingDto);
     }
 
     @DeleteMapping("/{id}")

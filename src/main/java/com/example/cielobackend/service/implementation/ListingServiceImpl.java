@@ -3,63 +3,168 @@ package com.example.cielobackend.service.implementation;
 import com.example.cielobackend.dto.*;
 import com.example.cielobackend.exception.ResourceDoesNotExistException;
 import com.example.cielobackend.model.*;
-import com.example.cielobackend.repository.ListingDetailRepository;
-import com.example.cielobackend.repository.ListingDetailValueRepository;
-import com.example.cielobackend.repository.ListingRepository;
+import com.example.cielobackend.repository.*;
+import com.example.cielobackend.service.ListingDetailService;
 import com.example.cielobackend.service.ListingService;
+
+import com.example.cielobackend.pagination.AbstractSpecification;
+import com.example.cielobackend.pagination.PaginationUtils;
+import com.example.cielobackend.pagination.SpecificationFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.cache.annotation.Cacheable;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.cielobackend.common.ExceptionMessages.*;
 
 @Service
 @RequiredArgsConstructor
 public class ListingServiceImpl implements ListingService {
+    @Value("${rabbitmq.images-exchange.name}")
+    private String imagesExchange;
+    @Value("${rabbitmq.deleted-images-q.routing-key}")
+    private String deletedImagesQueueRoutingKey;
+    private final ModelMapper modelMapper;
+    @PersistenceContext
+    private final EntityManager entityManager;
+    private final RabbitTemplate rabbitTemplate;
+    private final UserRepository userRepository;
     private final ListingRepository listingRepository;
+    private final CategoryRepository categoryRepository;
+    private final SpecificationFactory specificationFactory;
+    private final ListingDetailService listingDetailService;
     private final ListingDetailRepository listingDetailRepository;
     private final ListingDetailValueRepository listingDetailValueRepository;
-    private final AmqpTemplate amqpTemplate;
-    private final ModelMapper modelMapper = new ModelMapper();
 
     @Override
-    public List<ListingDtoResponse> getAllListings() {
-        return listingRepository
-                .findAll()
-                .stream()
-                .map(listing -> modelMapper.map(listing, ListingDtoResponse.class))
-                .peek(this::setSubcategoriesList)
-                //.peek(this::setSelectedValuesList)
-                .toList();
+    public Page<ListingDtoResponse> getListings(Map<String, String[]> params,
+                                                int categoryId, int page, int limit,
+                                                String sortBy, String orderBy) {
+        return getListingDtoResponsePage(params, categoryId, page, limit, sortBy, orderBy);
+    }
+
+    @NotNull
+    private Page<ListingDtoResponse> getListingDtoResponsePage(Map<String, String[]> params,
+                                                               int categoryId, int page, int limit,
+                                                               String sortBy, String orderBy) {
+        Page<Listing> listingPage = getListingPage(categoryId, page, limit, sortBy, orderBy, params);
+
+        Page<ListingDtoResponse> dtoResultPage = listingPage.map(listing -> {
+            ListingDtoResponse dto = modelMapper.map(listing, ListingDtoResponse.class);
+            setSubcategoriesList(dto);
+            setSelectedValuesList(dto);
+            return dto;
+        });
+
+        return dtoResultPage.getContent().size() > 0 ? dtoResultPage : Page.empty();
+    }
+
+    private Page<Listing> getListingPage(int categoryId, int page, int limit,
+                                         String sortBy, String orderBy,
+                                         Map<String, String[]> params) {
+        Pageable pageable = PaginationUtils.createPageable(page, limit, sortBy, orderBy);
+        List<Integer> childCategoriesIds = categoryRepository.findAllChildCategories(categoryId);
+        String categoryName = categoryRepository.findRootCategoryOfGivenCategoryId(categoryId);
+
+        AbstractSpecification<Listing> specification = specificationFactory.getSpecification(categoryName, params, childCategoriesIds);
+        return listingRepository.findAll(specification, pageable);
     }
 
     public ListingDtoResponse getListingById(long id) {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
         ListingDtoResponse listingResponse = modelMapper.map(listing, ListingDtoResponse.class);
+
+        System.out.println();
+        List<ListingDetailValueDto> values = listingResponse.getDetails().get(0).getDetailValues();
+
+        for (ListingDetailValueDto value : values) {
+            System.out.println(value.getAttributeValue().getValue());
+        }
+
         setSubcategoriesList(listingResponse);
-        //setSelectedValuesList(listingResponse);
+        setSelectedValuesList(listingResponse);
+
         return listingResponse;
     }
 
-//    private void setSelectedValuesList(ListingDtoResponse listing) {
-//        List<ListingDetailDtoResponse> details = listing.getListingDetails();
-//        for (ListingDetailDtoResponse detail : details) {
-//            List<Long> ids = new ArrayList<>();
-//            for (ListingDetailValueDto detailValue : detail.getDetailValues()) {
-//                ids.add(detailValue.getAttributeValue().getId());
-//            }
-//            detail.setSelectedValues(ids);
-//        }
-//    }
+    public Page<ListingDtoResponse> getAllFavouriteListingsForUser(long userId,
+                                                                   int page, int limit,
+                                                                   String sortBy, String orderBy) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
 
+        Pageable pageable = PaginationUtils.createPageable(page, limit, sortBy, orderBy);
+
+        List<Long> favoriteListingIds = user.getFavouriteListings()
+                                            .stream()
+                                            .map(Listing::getId)
+                                            .collect(Collectors.toList());
+
+        Page<ListingDtoResponse> resultPage = listingRepository
+                .findAllByUserAndIdIn(user, favoriteListingIds, pageable)
+                .map(listing -> {
+                    ListingDtoResponse response = modelMapper.map(listing, ListingDtoResponse.class);
+                    setSubcategoriesList(response);
+                    setSelectedValuesList(response);
+                    return response;
+                });
+
+        return resultPage.getContent().size() > 0 ? resultPage : Page.empty();
+    }
+
+
+    @Override
+    public Page<ListingDtoResponse> getAllListingsByUser(long userId,
+                                                         int categoryId, int page, int limit,
+                                                         String sortBy, String orderBy) {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new ResourceDoesNotExistException(USER_DOES_NOT_EXIST);
+        }
+
+        Map<String, String[]> params = new HashMap<>();
+        params.put("userId", new String[]{String.valueOf(userId)});
+
+        return getListingDtoResponsePage(params, categoryId, page, limit, sortBy, orderBy);
+    }
+
+    @Override
+    public void addListingToFavourites(long listingId, long userId) {
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
+
+        user.getFavouriteListings().add(listing);
+        userRepository.save(user);
+    }
+
+    private void setSelectedValuesList(ListingDtoResponse listing) {
+        List<ListingDetailDtoResponse> details = listing.getDetails();
+        for (ListingDetailDtoResponse detail : details) {
+            List<Long> ids = new ArrayList<>();
+            for (ListingDetailValueDto detailValue : detail.getDetailValues()) {
+                ids.add(detailValue.getAttributeValue().getId());
+            }
+            detail.setSelectedValues(ids);
+        }
+    }
 
     private void setSubcategoriesList(ListingDtoResponse listing) {
         List<CategoryDtoResponse> categories = new ArrayList<>();
@@ -82,30 +187,63 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
-    public ListingDtoResponse addListing(ListingDto listingDto) {
+    public ListingDtoResponse addListing(ListingDto listingDto, long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(USER_DOES_NOT_EXIST));
         Listing listing = modelMapper.map(listingDto, Listing.class);
 
         listing.setListedAt(LocalDateTime.now());
         listing.setLastUpdatedAt(LocalDateTime.now());
+        listing.setUser(user);
 
         listing = listingRepository.save(listing);
-
         setListingDetails(listing, listingDto.getDetails());
 
-        return modelMapper.map(listing, ListingDtoResponse.class);
+        entityManager.clear();
+        return getListingById(listing.getId());
+    }
+
+    @Override
+    public ListingDtoResponse updateListing(long id, ListingDtoUpdate listingDto) {
+        Listing listing = listingRepository.findById(id)
+                .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
+
+        handleCategoryChange(listingDto, listing);
+        listingDetailService.deleteAllForListing(listing);
+
+        modelMapper.map(listingDto, listing);
+
+        listing.setLastUpdatedAt(LocalDateTime.now());
+        setListingDetails(listing, listingDto.getDetails());
+
+        entityManager.clear();
+        return getListingById(id);
+    }
+
+    private void handleCategoryChange(ListingDtoUpdate listingDto, Listing listing) {
+        if (!Objects.equals(listingDto.getCategory().getId(), listing.getCategory().getId())) {
+            Category newCategory = categoryRepository.findById(listingDto.getCategory().getId())
+                    .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
+            listing.setCategory(newCategory);
+        }
     }
 
     private void setListingDetails(Listing listing, List<ListingDetailDto> details) {
         for (ListingDetailDto detail : details) {
             ListingDetail listingDetail = new ListingDetail();
+
             listingDetail.setListing(listing);
+            listingDetail.setValue(detail.getValue());
+
             listingDetail.setAttribute(modelMapper.map(detail.getAttribute(), Attribute.class));
             listingDetail = listingDetailRepository.save(listingDetail);
 
             for (ListingDetailValueDto detailValue : detail.getDetailValues()) {
                 ListingDetailValue listingDetailValue = new ListingDetailValue();
-                listingDetailValue.setListingDetailValue(listingDetail);
-                listingDetailValue.setAttributeValue(modelMapper.map(detailValue.getAttributeValue(), AttributeValue.class));
+
+                listingDetailValue.setListingDetail(listingDetail);
+                listingDetailValue. setAttributeValue(modelMapper.map(detailValue.getAttributeValue(), AttributeValue.class));
+
                 listingDetailValueRepository.save(listingDetailValue);
             }
         }
@@ -115,15 +253,18 @@ public class ListingServiceImpl implements ListingService {
     public void deleteListing(long id) {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
-        List<ListingImage> images = listing.getImages();
-        for (ListingImage image : images) {
-            sendImageToDeletionQueue(image.getName());
-        }
-
+        deleteListingImages(listing.getImages());
         listingRepository.delete(listing);
     }
 
-    private void sendImageToDeletionQueue(String imageName) {
-        amqpTemplate.convertAndSend("images-to-be-deleted", imageName);
+    @Async
+    public void deleteListingImages(List<ListingImage> images) {
+        for (ListingImage image : images) {
+            rabbitTemplate.convertAndSend(imagesExchange,
+                                          deletedImagesQueueRoutingKey,
+                                          image.getName());
+        }
     }
+
+
 }

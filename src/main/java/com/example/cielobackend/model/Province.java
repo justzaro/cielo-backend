@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.function.Function;
 
 @Data
 @Entity
@@ -14,12 +15,8 @@ public class Province {
     @Column(name = "province_id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "country_id")
-    private Country country;
 
     @OneToMany(mappedBy = "province")
     private List<City> cities;

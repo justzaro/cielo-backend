@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1/cielo/attribute-values")
+@RequestMapping("${api.basePath}/attribute-values")
 @RequiredArgsConstructor
 public class AttributeValueController {
     private final AttributeValueService attributeValueService;

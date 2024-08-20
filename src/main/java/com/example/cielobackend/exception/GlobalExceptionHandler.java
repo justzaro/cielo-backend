@@ -10,7 +10,10 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    @ExceptionHandler({
+            ResourceAlreadyExistsException.class,
+            DuplicateUniqueFieldException.class
+    })
     public ResponseEntity<ErrorResponse> handleConflictExceptions(Exception e) {
         ErrorResponse errorResponse = new ErrorResponse();
 
@@ -30,5 +33,16 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidOrderByException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestExceptions(Exception e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setTimestamp(LocalDateTime.now());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }

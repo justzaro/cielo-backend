@@ -1,11 +1,15 @@
 package com.example.cielobackend.model;
 
+import com.example.cielobackend.common.enums.QualityType;
+import com.example.cielobackend.common.enums.ListingType;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 @Data
 @Entity
@@ -28,6 +32,9 @@ public class Listing {
     @Column(name = "contact_name", nullable = false)
     private String contactName;
 
+    @Column(name = "isFree")
+    private Boolean isFree;
+
     @Column(name = "price_is_negotiable")
     private Boolean priceIsNegotiable;
 
@@ -39,13 +46,10 @@ public class Listing {
     @Column(name = "views_counter")
     private Long viewsCounter;
 
-    @Column(name = "image_path")
-    private String imagePath;
-
-    @Column(name = "listed_on", nullable = false)
+    @Column(name = "listed_at", nullable = false)
     private LocalDateTime listedAt;
 
-    @Column(name = "last_updated_on")
+    @Column(name = "last_updated_at", nullable = false)
     private LocalDateTime lastUpdatedAt;
 
     @Column(name = "is_active", nullable = false)
@@ -60,13 +64,45 @@ public class Listing {
     @Column(name = "is_auto_renewable", nullable = false)
     private Boolean isAutoRenewable;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ListingType type;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private QualityType quality;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "city_id")
+    private City city;
+
     @OneToMany(mappedBy = "listing", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    private List<ListingDetail> listingDetails;
+    private List<ListingDetail> details;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<ListingImage> images;
+
+    @ManyToMany(mappedBy = "favouriteListings")
+    private Set<User> favouritedBy;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Listing listing = (Listing) o;
+        return Objects.equals(id, listing.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
