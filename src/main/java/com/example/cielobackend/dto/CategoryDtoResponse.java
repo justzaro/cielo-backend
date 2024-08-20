@@ -22,5 +22,5 @@ public class CategoryDtoResponse {
 
     private List<CategoryDtoResponse> subcategories;
 
-    private Set<AttributeDtoResponse> attributes;
+    //private Set<AttributeDtoResponse> attributes;
 }

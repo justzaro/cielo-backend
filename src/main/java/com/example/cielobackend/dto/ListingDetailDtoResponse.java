@@ -9,7 +9,8 @@ import java.util.List;
 
 @Data
 public class ListingDetailDtoResponse {
-    private FullAttributeDtoResponse attribute;
+    private AttributeDtoResponse attribute;
+    private String value;
     @JsonIgnore
     private List<ListingDetailValueDto> detailValues;
     private List<Long> selectedValues;

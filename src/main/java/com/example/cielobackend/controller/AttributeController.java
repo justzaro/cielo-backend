@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/cielo/attributes")
+@RequestMapping("${api.basePath}/attributes")
 @RequiredArgsConstructor
 public class AttributeController {
     private final AttributeService attributeService;
