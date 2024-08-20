@@ -73,6 +73,9 @@ public abstract class AbstractSpecification<T> implements Specification<T> {
                     criteriaBuilder.equal(joinAttributes.get("name"), attributeName),
                     joinAttributeValues.get("value").in(values)
             );
+
+            System.out.println("asd");
+            System.out.println(joinAttributeValues.get("value").toString());
             predicates.add(predicate);
         }
     }

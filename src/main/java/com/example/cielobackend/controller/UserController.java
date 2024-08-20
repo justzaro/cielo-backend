@@ -46,7 +46,7 @@ public class UserController {
             @RequestParam(value = "limit", defaultValue = "10") @Min(1) @Max(20)  Integer limit,
             @RequestParam(value = "sortBy", defaultValue = "listedAt") String sortBy,
             @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy) {
-
+        //
         return listingService.getAllListingsByUser(userId, categoryId, page, limit, sortBy, orderBy);
     }
 

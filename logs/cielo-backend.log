@@ -1,73 +1,41 @@
-2024-07-19T16:36:14.828+03:00  INFO 23656 --- [main] c.e.c.CieloBackendApplication            : Starting CieloBackendApplication using Java 21.0.2 with PID 23656 (D:\Java Projects\cielo-backend\target\classes started by Zaro in D:\Java Projects\cielo-backend)
-2024-07-19T16:36:14.839+03:00 DEBUG 23656 --- [main] c.e.c.CieloBackendApplication            : Running with Spring Boot v3.2.3, Spring v6.1.4
-2024-07-19T16:36:14.840+03:00  INFO 23656 --- [main] c.e.c.CieloBackendApplication            : No active profile set, falling back to 1 default profile: "default"
-2024-07-19T16:36:15.590+03:00  INFO 23656 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2024-07-19T16:36:15.693+03:00  INFO 23656 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 96 ms. Found 9 JPA repository interfaces.
-2024-07-19T16:36:16.215+03:00  INFO 23656 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2024-07-19T16:36:16.226+03:00  INFO 23656 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2024-07-19T16:36:16.227+03:00  INFO 23656 --- [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
-2024-07-19T16:36:16.282+03:00  INFO 23656 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2024-07-19T16:36:16.283+03:00  INFO 23656 --- [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1392 ms
-2024-07-19T16:36:16.416+03:00  INFO 23656 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2024-07-19T16:36:16.475+03:00  INFO 23656 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
-2024-07-19T16:36:16.511+03:00  INFO 23656 --- [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2024-07-19T16:36:16.682+03:00  INFO 23656 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2024-07-19T16:36:16.704+03:00  INFO 23656 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2024-07-19T16:36:17.127+03:00  INFO 23656 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@28f05b0c
-2024-07-19T16:36:17.129+03:00  INFO 23656 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2024-07-19T16:36:18.147+03:00  INFO 23656 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2024-07-19T16:36:18.444+03:00  INFO 23656 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2024-07-19T16:36:18.943+03:00  INFO 23656 --- [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2024-07-19T16:36:19.359+03:00  INFO 23656 --- [main] org.reflections.Reflections              : Reflections took 31 ms to scan 1 urls, producing 4 keys and 8 values
-2024-07-19T16:36:19.547+03:00  WARN 23656 --- [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2024-07-19T16:36:20.038+03:00  INFO 23656 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
-2024-07-19T16:36:20.041+03:00  INFO 23656 --- [main] o.s.a.r.c.CachingConnectionFactory       : Attempting to connect to: [localhost:5672]
-2024-07-19T16:36:20.089+03:00  INFO 23656 --- [main] o.s.a.r.c.CachingConnectionFactory       : Created new connection: rabbitConnectionFactory#25d87313:0/SimpleConnection@5beda06e [delegate=amqp://guest@127.0.0.1:5672/, localPort=52862]
-2024-07-19T16:36:20.096+03:00  INFO 23656 --- [main] o.s.amqp.rabbit.core.RabbitAdmin         : Auto-declaring a non-durable, auto-delete, or exclusive Queue (image-user-mapping-q) durable:false, auto-delete:false, exclusive:false. It will be redeclared if the broker stops and is restarted while the connection factory is alive, but all messages will be lost.
-2024-07-19T16:36:20.096+03:00  INFO 23656 --- [main] o.s.amqp.rabbit.core.RabbitAdmin         : Auto-declaring a non-durable, auto-delete, or exclusive Queue (image-listing-mapping-q) durable:false, auto-delete:false, exclusive:false. It will be redeclared if the broker stops and is restarted while the connection factory is alive, but all messages will be lost.
-2024-07-19T16:36:20.096+03:00  INFO 23656 --- [main] o.s.amqp.rabbit.core.RabbitAdmin         : Auto-declaring a non-durable, auto-delete, or exclusive Queue (image-category-mapping-q) durable:false, auto-delete:false, exclusive:false. It will be redeclared if the broker stops and is restarted while the connection factory is alive, but all messages will be lost.
-2024-07-19T16:36:20.188+03:00  INFO 23656 --- [main] c.e.c.CieloBackendApplication            : Started CieloBackendApplication in 5.806 seconds (process running for 6.838)
-2024-07-19T16:36:26.606+03:00  INFO 23656 --- [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2024-07-19T16:36:26.607+03:00  INFO 23656 --- [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2024-07-19T16:36:26.608+03:00  INFO 23656 --- [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2024-07-19T17:16:16.168+03:00  INFO 23656 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#2-2] o.s.a.r.l.SimpleMessageListenerContainer : Waiting for workers to finish.
-2024-07-19T17:16:16.167+03:00  INFO 23656 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#1-2] o.s.a.r.l.SimpleMessageListenerContainer : Waiting for workers to finish.
-2024-07-19T17:16:16.167+03:00  INFO 23656 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-2] o.s.a.r.l.SimpleMessageListenerContainer : Waiting for workers to finish.
-2024-07-19T17:16:16.931+03:00  INFO 23656 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#2-2] o.s.a.r.l.SimpleMessageListenerContainer : Successfully waited for workers to finish.
-2024-07-19T17:16:16.947+03:00  INFO 23656 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#1-2] o.s.a.r.l.SimpleMessageListenerContainer : Successfully waited for workers to finish.
-2024-07-19T17:16:16.947+03:00  INFO 23656 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-2] o.s.a.r.l.SimpleMessageListenerContainer : Successfully waited for workers to finish.
-2024-07-19T17:16:16.975+03:00  INFO 23656 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2024-07-19T17:16:16.988+03:00  INFO 23656 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2024-07-19T17:16:16.992+03:00  INFO 23656 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2024-07-19T17:16:23.427+03:00  INFO 8116 --- [main] c.e.c.CieloBackendApplication            : Starting CieloBackendApplication using Java 21.0.2 with PID 8116 (D:\Java Projects\cielo-backend\target\classes started by Zaro in D:\Java Projects\cielo-backend)
-2024-07-19T17:16:23.428+03:00 DEBUG 8116 --- [main] c.e.c.CieloBackendApplication            : Running with Spring Boot v3.2.3, Spring v6.1.4
-2024-07-19T17:16:23.429+03:00  INFO 8116 --- [main] c.e.c.CieloBackendApplication            : No active profile set, falling back to 1 default profile: "default"
-2024-07-19T17:16:24.143+03:00  INFO 8116 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2024-07-19T17:16:24.231+03:00  INFO 8116 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 82 ms. Found 9 JPA repository interfaces.
-2024-07-19T17:16:24.684+03:00  INFO 8116 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2024-07-19T17:16:24.694+03:00  INFO 8116 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2024-07-19T17:16:24.694+03:00  INFO 8116 --- [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
-2024-07-19T17:16:24.746+03:00  INFO 8116 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2024-07-19T17:16:24.746+03:00  INFO 8116 --- [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1277 ms
-2024-07-19T17:16:24.872+03:00  INFO 8116 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2024-07-19T17:16:24.932+03:00  INFO 8116 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
-2024-07-19T17:16:24.972+03:00  INFO 8116 --- [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2024-07-19T17:16:25.139+03:00  INFO 8116 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2024-07-19T17:16:25.160+03:00  INFO 8116 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2024-07-19T17:16:25.489+03:00  INFO 8116 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@20c3b34b
-2024-07-19T17:16:25.491+03:00  INFO 8116 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2024-07-19T17:16:26.461+03:00  INFO 8116 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2024-07-19T17:16:26.700+03:00  INFO 8116 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2024-07-19T17:16:27.126+03:00  INFO 8116 --- [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2024-07-19T17:16:27.518+03:00  INFO 8116 --- [main] org.reflections.Reflections              : Reflections took 24 ms to scan 1 urls, producing 4 keys and 8 values
-2024-07-19T17:16:27.608+03:00  WARN 8116 --- [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2024-07-19T17:16:28.017+03:00  INFO 8116 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
-2024-07-19T17:16:28.020+03:00  INFO 8116 --- [main] o.s.a.r.c.CachingConnectionFactory       : Attempting to connect to: [localhost:5672]
-2024-07-19T17:16:28.044+03:00  INFO 8116 --- [main] o.s.a.r.c.CachingConnectionFactory       : Created new connection: rabbitConnectionFactory#20dc763b:0/SimpleConnection@55fb9e52 [delegate=amqp://guest@127.0.0.1:5672/, localPort=55428]
-2024-07-19T17:16:28.050+03:00  INFO 8116 --- [main] o.s.amqp.rabbit.core.RabbitAdmin         : Auto-declaring a non-durable, auto-delete, or exclusive Queue (image-user-mapping-q) durable:false, auto-delete:false, exclusive:false. It will be redeclared if the broker stops and is restarted while the connection factory is alive, but all messages will be lost.
-2024-07-19T17:16:28.050+03:00  INFO 8116 --- [main] o.s.amqp.rabbit.core.RabbitAdmin         : Auto-declaring a non-durable, auto-delete, or exclusive Queue (image-listing-mapping-q) durable:false, auto-delete:false, exclusive:false. It will be redeclared if the broker stops and is restarted while the connection factory is alive, but all messages will be lost.
-2024-07-19T17:16:28.050+03:00  INFO 8116 --- [main] o.s.amqp.rabbit.core.RabbitAdmin         : Auto-declaring a non-durable, auto-delete, or exclusive Queue (image-category-mapping-q) durable:false, auto-delete:false, exclusive:false. It will be redeclared if the broker stops and is restarted while the connection factory is alive, but all messages will be lost.
-2024-07-19T17:16:28.109+03:00  INFO 8116 --- [main] c.e.c.CieloBackendApplication            : Started CieloBackendApplication in 5.062 seconds (process running for 5.731)
-2024-07-19T17:16:39.552+03:00  INFO 8116 --- [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2024-07-19T17:16:39.552+03:00  INFO 8116 --- [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2024-07-19T17:16:39.554+03:00  INFO 8116 --- [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2024-08-20T17:03:19.360+03:00  INFO 30260 --- [main] c.e.c.CieloBackendApplication            : Starting CieloBackendApplication using Java 21.0.2 with PID 30260 (D:\Java Projects\cielo-backend\target\classes started by Zaro in D:\Java Projects\cielo-backend)
+2024-08-20T17:03:19.370+03:00 DEBUG 30260 --- [main] c.e.c.CieloBackendApplication            : Running with Spring Boot v3.2.3, Spring v6.1.4
+2024-08-20T17:03:19.371+03:00  INFO 30260 --- [main] c.e.c.CieloBackendApplication            : No active profile set, falling back to 1 default profile: "default"
+2024-08-20T17:03:20.295+03:00  INFO 30260 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-08-20T17:03:20.417+03:00  INFO 30260 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 114 ms. Found 9 JPA repository interfaces.
+2024-08-20T17:03:20.981+03:00  INFO 30260 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2024-08-20T17:03:20.993+03:00  INFO 30260 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2024-08-20T17:03:20.993+03:00  INFO 30260 --- [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2024-08-20T17:03:21.068+03:00  INFO 30260 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2024-08-20T17:03:21.069+03:00  INFO 30260 --- [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1639 ms
+2024-08-20T17:03:21.239+03:00  INFO 30260 --- [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-08-20T17:03:21.297+03:00  INFO 30260 --- [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2024-08-20T17:03:21.331+03:00  INFO 30260 --- [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2024-08-20T17:03:21.581+03:00  INFO 30260 --- [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-08-20T17:03:21.600+03:00  INFO 30260 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-08-20T17:03:21.946+03:00  INFO 30260 --- [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6d3163a6
+2024-08-20T17:03:21.948+03:00  INFO 30260 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-08-20T17:03:22.979+03:00  INFO 30260 --- [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-08-20T17:03:23.223+03:00  INFO 30260 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-08-20T17:03:23.819+03:00  INFO 30260 --- [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2024-08-20T17:03:24.327+03:00  INFO 30260 --- [main] org.reflections.Reflections              : Reflections took 38 ms to scan 1 urls, producing 4 keys and 8 values
+2024-08-20T17:03:24.456+03:00  WARN 30260 --- [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2024-08-20T17:03:25.039+03:00  INFO 30260 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2024-08-20T17:03:25.045+03:00  INFO 30260 --- [main] o.s.a.r.c.CachingConnectionFactory       : Attempting to connect to: [localhost:5672]
+2024-08-20T17:03:25.113+03:00  INFO 30260 --- [main] o.s.a.r.c.CachingConnectionFactory       : Created new connection: rabbitConnectionFactory#471d6571:0/SimpleConnection@23b260ed [delegate=amqp://guest@127.0.0.1:5672/, localPort=59708]
+2024-08-20T17:03:25.120+03:00  INFO 30260 --- [main] o.s.amqp.rabbit.core.RabbitAdmin         : Auto-declaring a non-durable, auto-delete, or exclusive Queue (image-user-mapping-q) durable:false, auto-delete:false, exclusive:false. It will be redeclared if the broker stops and is restarted while the connection factory is alive, but all messages will be lost.
+2024-08-20T17:03:25.121+03:00  INFO 30260 --- [main] o.s.amqp.rabbit.core.RabbitAdmin         : Auto-declaring a non-durable, auto-delete, or exclusive Queue (image-listing-mapping-q) durable:false, auto-delete:false, exclusive:false. It will be redeclared if the broker stops and is restarted while the connection factory is alive, but all messages will be lost.
+2024-08-20T17:03:25.121+03:00  INFO 30260 --- [main] o.s.amqp.rabbit.core.RabbitAdmin         : Auto-declaring a non-durable, auto-delete, or exclusive Queue (image-category-mapping-q) durable:false, auto-delete:false, exclusive:false. It will be redeclared if the broker stops and is restarted while the connection factory is alive, but all messages will be lost.
+2024-08-20T17:03:25.207+03:00  INFO 30260 --- [main] c.e.c.CieloBackendApplication            : Started CieloBackendApplication in 6.204 seconds (process running for 7.148)
+2024-08-20T17:03:30.697+03:00  INFO 30260 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2024-08-20T17:03:30.697+03:00  INFO 30260 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2024-08-20T17:03:30.699+03:00  INFO 30260 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2024-08-20T17:27:03.772+03:00  INFO 30260 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-2] o.s.a.r.l.SimpleMessageListenerContainer : Waiting for workers to finish.
+2024-08-20T17:27:03.773+03:00  INFO 30260 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#1-2] o.s.a.r.l.SimpleMessageListenerContainer : Waiting for workers to finish.
+2024-08-20T17:27:03.774+03:00  INFO 30260 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#2-2] o.s.a.r.l.SimpleMessageListenerContainer : Waiting for workers to finish.
+2024-08-20T17:27:03.798+03:00  INFO 30260 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#2-2] o.s.a.r.l.SimpleMessageListenerContainer : Successfully waited for workers to finish.
+2024-08-20T17:27:04.765+03:00  INFO 30260 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-2] o.s.a.r.l.SimpleMessageListenerContainer : Successfully waited for workers to finish.
+2024-08-20T17:27:04.765+03:00  INFO 30260 --- [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#1-2] o.s.a.r.l.SimpleMessageListenerContainer : Successfully waited for workers to finish.
+2024-08-20T17:27:04.775+03:00  INFO 30260 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-08-20T17:27:04.776+03:00  INFO 30260 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-08-20T17:27:04.781+03:00  INFO 30260 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

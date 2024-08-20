@@ -50,17 +50,11 @@ public class ListingServiceImpl implements ListingService {
     private final ListingDetailService listingDetailService;
     private final ListingDetailRepository listingDetailRepository;
     private final ListingDetailValueRepository listingDetailValueRepository;
-    private final ApplicationContext applicationContext;
 
     @Override
     public Page<ListingDtoResponse> getListings(Map<String, String[]> params,
                                                 int categoryId, int page, int limit,
                                                 String sortBy, String orderBy) {
-        String[] beanNames = applicationContext.getBeanNamesForType(JpaRepository.class);
-
-        for (String beanName : beanNames) {
-            System.out.println(beanName);
-        }
         return getListingDtoResponsePage(params, categoryId, page, limit, sortBy, orderBy);
     }
 
@@ -95,6 +89,13 @@ public class ListingServiceImpl implements ListingService {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
         ListingDtoResponse listingResponse = modelMapper.map(listing, ListingDtoResponse.class);
+
+        System.out.println();
+        List<ListingDetailValueDto> values = listingResponse.getDetails().get(0).getDetailValues();
+
+        for (ListingDetailValueDto value : values) {
+            System.out.println(value.getAttributeValue().getValue());
+        }
 
         setSubcategoriesList(listingResponse);
         setSelectedValuesList(listingResponse);
@@ -241,7 +242,7 @@ public class ListingServiceImpl implements ListingService {
                 ListingDetailValue listingDetailValue = new ListingDetailValue();
 
                 listingDetailValue.setListingDetail(listingDetail);
-                listingDetailValue.setAttributeValue(modelMapper.map(detailValue.getAttributeValue(), AttributeValue.class));
+                listingDetailValue. setAttributeValue(modelMapper.map(detailValue.getAttributeValue(), AttributeValue.class));
 
                 listingDetailValueRepository.save(listingDetailValue);
             }
