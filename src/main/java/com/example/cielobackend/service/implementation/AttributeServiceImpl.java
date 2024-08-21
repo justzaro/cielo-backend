@@ -7,6 +7,7 @@ import com.example.cielobackend.model.AttributeValue;
 import com.example.cielobackend.repository.AttributeRepository;
 import com.example.cielobackend.repository.AttributeValueRepository;
 import com.example.cielobackend.service.AttributeService;
+import com.example.cielobackend.service.DataValidationService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import static com.example.cielobackend.common.ExceptionMessages.*;
 @RequiredArgsConstructor
 public class AttributeServiceImpl implements AttributeService {
     private final AttributeRepository attributeRepository;
-    private final AttributeValueRepository attributeValueRepository;
+    private final DataValidationService dataValidationService;
     private final ModelMapper modelMapper = new ModelMapper();
 
     @Override

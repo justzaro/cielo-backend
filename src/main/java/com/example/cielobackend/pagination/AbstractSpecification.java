@@ -14,10 +14,10 @@ import java.util.Map;
 public abstract class AbstractSpecification<T> implements Specification<T> {
     private Map<String, String[]> parameters;
     private List<Integer> childCategoryIds;
-    private Join<Listing, ListingDetail> joinDetails;
-    private Join<ListingDetail, ListingDetailValue> joinDetailValues;
-    private Join<ListingDetailValue, AttributeValue> joinAttributeValues;
-    private Join<ListingDetail, Attribute> joinAttributes;
+//    private Join<Listing, ListingDetail> joinDetails;
+//    private Join<ListingDetail, ListingDetailValue> joinDetailValues;
+//    private Join<ListingDetailValue, AttributeValue> joinAttributeValues;
+//    private Join<ListingDetail, Attribute> joinAttributes;
 
     public AbstractSpecification(Map<String, String[]> parameters, List<Integer> childCategoryIds) {
         this.parameters = parameters;
@@ -25,10 +25,10 @@ public abstract class AbstractSpecification<T> implements Specification<T> {
     }
 
     protected void setupJoins(Root<T> root) {
-        joinDetails = root.join("details", JoinType.INNER);
-        joinDetailValues = joinDetails.join("detailValues", JoinType.INNER);
-        joinAttributeValues = joinDetailValues.join("attributeValue", JoinType.INNER);
-        joinAttributes = joinDetails.join("attribute", JoinType.INNER);
+//        joinDetails = root.join("details", JoinType.INNER);
+//        joinDetailValues = joinDetails.join("detailValues", JoinType.INNER);
+//        joinAttributeValues = joinDetailValues.join("attributeValue", JoinType.INNER);
+//        joinAttributes = joinDetails.join("attribute", JoinType.INNER);
     }
 
     @Override
@@ -68,16 +68,16 @@ public abstract class AbstractSpecification<T> implements Specification<T> {
     protected void addPredicate(List<Predicate> predicates,
                                 String attributeName, List<String> values,
                                 CriteriaBuilder criteriaBuilder) {
-        if (values != null && !values.isEmpty()) {
-            Predicate predicate = criteriaBuilder.and(
-                    criteriaBuilder.equal(joinAttributes.get("name"), attributeName),
-                    joinAttributeValues.get("value").in(values)
-            );
-
-            System.out.println("asd");
-            System.out.println(joinAttributeValues.get("value").toString());
-            predicates.add(predicate);
-        }
+//        if (values != null && !values.isEmpty()) {
+//            Predicate predicate = criteriaBuilder.and(
+//                    criteriaBuilder.equal(joinAttributes.get("name"), attributeName),
+//                    joinAttributeValues.get("value").in(values)
+//            );
+//
+//            System.out.println("asd");
+//            System.out.println(joinAttributeValues.get("value").toString());
+//            predicates.add(predicate);
+//        }
     }
 
     protected List<String> getListParameter(String paramName) {
