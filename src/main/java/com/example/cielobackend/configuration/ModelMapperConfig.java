@@ -18,7 +18,7 @@ public class ModelMapperConfig {
             @Override
             protected void configure() {
                 skip(destination.getId());
-                skip(destination.getDetails());
+                //skip(destination.getDetails());
                 skip(destination.getCategory());
             }
         });

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Data
 @Entity
@@ -21,6 +23,6 @@ public class AttributeValue {
     @JoinColumn(name = "attribute_id")
     private Attribute attribute;
 
-    @OneToMany(mappedBy = "attributeValue")
-    private List<ListingDetailValue> values;
+    @ManyToMany(mappedBy = "attributeValues")
+    private Set<ListingAttribute> listingAttributes;
 }

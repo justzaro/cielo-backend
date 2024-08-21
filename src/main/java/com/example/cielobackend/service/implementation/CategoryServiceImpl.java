@@ -17,7 +17,9 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.example.cielobackend.common.ExceptionMessages.*;
@@ -31,6 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
     private String deletedImagesQueueRoutingKey;
     private final RabbitTemplate rabbitTemplate;
     private final CategoryRepository categoryRepository;
+    private final AttributeRepository attributeRepository;
     private final DataValidationService dataValidationService;
     private final ModelMapper modelMapper = new ModelMapper();
 
@@ -79,6 +82,20 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(category);
 
         return modelMapper.map(category, CategoryDtoResponse.class);
+    }
+
+    @Override
+    public List<AttributeDtoResponse> getAllAttributesByCategoryId(long id) {
+        Category category = dataValidationService.getResourceOrThrow(Category.class, id, CATEGORY_DOES_NOT_EXIST);
+
+        Set<Category> categories = new HashSet<>();
+        categories.add(category);
+
+        return attributeRepository
+               .findAllByCategories(categories)
+               .stream()
+               .map(attribute -> modelMapper.map(attribute, AttributeDtoResponse.class))
+               .collect(Collectors.toList());
     }
 
     public AttributeDtoResponse addAttributeToCategory(long categoryId, long attributeId) {

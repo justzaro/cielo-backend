@@ -19,11 +19,11 @@ public class Attribute {
     @Column
     private String name;
 
-    @OneToMany(mappedBy = "attribute")
-    private List<ListingDetail> listingDetails;
-
     @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<AttributeValue> attributeValues;
+
+    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ListingAttribute> listingAttributes;
 
     @ManyToMany(mappedBy = "attributes")
     private Set<Category> categories;

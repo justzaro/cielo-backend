@@ -85,10 +85,10 @@ public class Listing {
     private City city;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    private List<ListingDetail> details;
-
-    @OneToMany(mappedBy = "listing", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<ListingImage> images;
+
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ListingAttribute> attributes;
 
     @ManyToMany(mappedBy = "favouriteListings")
     private Set<User> favouritedBy;

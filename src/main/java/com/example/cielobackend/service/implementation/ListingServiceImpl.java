@@ -4,7 +4,6 @@ import com.example.cielobackend.dto.*;
 import com.example.cielobackend.exception.ResourceDoesNotExistException;
 import com.example.cielobackend.model.*;
 import com.example.cielobackend.repository.*;
-import com.example.cielobackend.service.ListingDetailService;
 import com.example.cielobackend.service.ListingService;
 
 import com.example.cielobackend.pagination.AbstractSpecification;
@@ -19,10 +18,8 @@ import org.modelmapper.ModelMapper;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -47,9 +44,6 @@ public class ListingServiceImpl implements ListingService {
     private final ListingRepository listingRepository;
     private final CategoryRepository categoryRepository;
     private final SpecificationFactory specificationFactory;
-    private final ListingDetailService listingDetailService;
-    private final ListingDetailRepository listingDetailRepository;
-    private final ListingDetailValueRepository listingDetailValueRepository;
 
     @Override
     public Page<ListingDtoResponse> getListings(Map<String, String[]> params,
@@ -197,7 +191,7 @@ public class ListingServiceImpl implements ListingService {
         listing.setUser(user);
 
         listing = listingRepository.save(listing);
-        setListingDetails(listing, listingDto.getDetails());
+        //setListingDetails(listing, listingDto.getDetails());
 
         entityManager.clear();
         return getListingById(listing.getId());
@@ -209,12 +203,12 @@ public class ListingServiceImpl implements ListingService {
                 .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
 
         handleCategoryChange(listingDto, listing);
-        listingDetailService.deleteAllForListing(listing);
+        //listingDetailService.deleteAllForListing(listing);
 
         modelMapper.map(listingDto, listing);
-
+        
         listing.setLastUpdatedAt(LocalDateTime.now());
-        setListingDetails(listing, listingDto.getDetails());
+        //setListingDetails(listing, listingDto.getDetails());
 
         entityManager.clear();
         return getListingById(id);
@@ -228,26 +222,26 @@ public class ListingServiceImpl implements ListingService {
         }
     }
 
-    private void setListingDetails(Listing listing, List<ListingDetailDto> details) {
-        for (ListingDetailDto detail : details) {
-            ListingDetail listingDetail = new ListingDetail();
-
-            listingDetail.setListing(listing);
-            listingDetail.setValue(detail.getValue());
-
-            listingDetail.setAttribute(modelMapper.map(detail.getAttribute(), Attribute.class));
-            listingDetail = listingDetailRepository.save(listingDetail);
-
-            for (ListingDetailValueDto detailValue : detail.getDetailValues()) {
-                ListingDetailValue listingDetailValue = new ListingDetailValue();
-
-                listingDetailValue.setListingDetail(listingDetail);
-                listingDetailValue. setAttributeValue(modelMapper.map(detailValue.getAttributeValue(), AttributeValue.class));
-
-                listingDetailValueRepository.save(listingDetailValue);
-            }
-        }
-    }
+//    private void setListingDetails(Listing listing, List<ListingDetailDto> details) {
+//        for (ListingDetailDto detail : details) {
+//            ListingDetail listingDetail = new ListingDetail();
+//
+//            listingDetail.setListing(listing);
+//            listingDetail.setValue(detail.getValue());
+//
+//            listingDetail.setAttribute(modelMapper.map(detail.getAttribute(), Attribute.class));
+//            listingDetail = listingDetailRepository.save(listingDetail);
+//
+//            for (ListingDetailValueDto detailValue : detail.getDetailValues()) {
+//                ListingDetailValue listingDetailValue = new ListingDetailValue();
+//
+//                listingDetailValue.setListingDetail(listingDetail);
+//                listingDetailValue. setAttributeValue(modelMapper.map(detailValue.getAttributeValue(), AttributeValue.class));
+//
+//                listingDetailValueRepository.save(listingDetailValue);
+//            }
+//        }
+//    }
 
     @Override
     public void deleteListing(long id) {

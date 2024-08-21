@@ -33,6 +33,11 @@ public class CategoryController {
         return categoryService.countAllListingsByCategory(id);
     }
 
+    @GetMapping("/{id}/attributes")
+    public List<AttributeDtoResponse> getAttributeByCategoryId(@PathVariable long id) {
+        return categoryService.getAllAttributesByCategoryId(id);
+    }
+
     @PostMapping
     public CategoryDtoResponse addCategory(@RequestBody @Valid CategoryDto categoryDto) {
         return categoryService.addCategory(categoryDto);

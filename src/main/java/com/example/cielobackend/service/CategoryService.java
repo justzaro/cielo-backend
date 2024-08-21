@@ -14,6 +14,7 @@ public interface CategoryService {
    CategoryDtoResponse updateCategory(long id, CategoryDto categoryDto);
    void deleteCategory(long id);
    void setCategoryImageName(long id, String imageName);
+   List<AttributeDtoResponse> getAllAttributesByCategoryId(long id);
    AttributeDtoResponse addAttributeToCategory(long categoryId, long attributeId);
    void removeAttributeFromCategory(long categoryId, long attributeId);
    Long countAllListingsByCategory(long id);
