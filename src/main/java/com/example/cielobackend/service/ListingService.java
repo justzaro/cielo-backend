@@ -1,5 +1,6 @@
 package com.example.cielobackend.service;
 
+import com.example.cielobackend.dto.ListingAttributeDto;
 import com.example.cielobackend.dto.ListingDto;
 import com.example.cielobackend.dto.ListingDtoResponse;
 import com.example.cielobackend.dto.ListingDtoUpdate;
@@ -15,6 +16,7 @@ public interface ListingService {
     Page<ListingDtoResponse> getListings(Map<String, String[]> parameterMap,
                                          int categoryId, int page, int limit,
                                          String sortBy, String orderBy);
+    List<ListingAttributeDto> getAllAttributesForListing(long id);
     void addListingToFavourites(long listingId, long userId);
     Page<ListingDtoResponse> getAllFavouriteListingsForUser(long userId,
                                                             int page, int limit,

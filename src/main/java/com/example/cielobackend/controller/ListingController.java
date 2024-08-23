@@ -1,5 +1,6 @@
 package com.example.cielobackend.controller;
 
+import com.example.cielobackend.dto.ListingAttributeDto;
 import com.example.cielobackend.dto.ListingDto;
 import com.example.cielobackend.dto.ListingDtoResponse;
 import com.example.cielobackend.dto.ListingDtoUpdate;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,9 +36,13 @@ public class ListingController {
             @RequestParam(value = "sortBy", defaultValue = "listedAt") String sortBy,
             @RequestParam(value = "orderBy", defaultValue = "asc") String orderBy,
             HttpServletRequest httpServletRequest) {
-
         Map<String, String[]> params = httpServletRequest.getParameterMap();
         return listingService.getListings(params, categoryId, page, limit, sortBy, orderBy);
+    }
+
+    @GetMapping("/{id}/attributes")
+    public List<ListingAttributeDto> getAllAttributesForListing(@PathVariable long id) {
+        return listingService.getAllAttributesForListing(id);
     }
 
     @PostMapping

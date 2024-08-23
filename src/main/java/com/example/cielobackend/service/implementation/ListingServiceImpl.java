@@ -39,8 +39,6 @@ public class ListingServiceImpl implements ListingService {
     @Value("${rabbitmq.deleted-images-q.routing-key}")
     private String deletedImagesQueueRoutingKey;
     private final ModelMapper modelMapper;
-    @PersistenceContext
-    private final EntityManager entityManager;
     private final RabbitTemplate rabbitTemplate;
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
@@ -63,7 +61,7 @@ public class ListingServiceImpl implements ListingService {
 
         Page<ListingDtoResponse> dtoResultPage = listingPage.map(listing -> {
             ListingDtoResponse dto = modelMapper.map(listing, ListingDtoResponse.class);
-            //setSubcategoriesList(dto);
+            setSubcategoriesList(dto);
             //setSelectedValuesList(dto);
             return dto;
         });
@@ -87,19 +85,7 @@ public class ListingServiceImpl implements ListingService {
                 .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
 
         ListingDtoResponse listingResponse = modelMapper.map(listing, ListingDtoResponse.class);
-
-        for (ListingAttribute attribute : listing.getAttributes()) {
-            System.out.println(attribute.getAttributeValues().size());
-        }
-
-//        System.out.println();
-//        List<ListingDetailValueDto> values = listingResponse.getDetails().get(0).getDetailValues();
-//
-//        for (ListingDetailValueDto value : values) {
-//            System.out.println(value.getAttributeValue().getValue());
-//        }
-//
-//        setSubcategoriesList(listingResponse);
+        setSubcategoriesList(listingResponse);
 //        setSelectedValuesList(listingResponse);
 
         return listingResponse;
@@ -122,7 +108,7 @@ public class ListingServiceImpl implements ListingService {
                 .findAllByUserAndIdIn(user, favoriteListingIds, pageable)
                 .map(listing -> {
                     ListingDtoResponse response = modelMapper.map(listing, ListingDtoResponse.class);
-                    //setSubcategoriesList(response);
+                    setSubcategoriesList(response);
                     //setSelectedValuesList(response);
                     return response;
                 });
@@ -145,6 +131,16 @@ public class ListingServiceImpl implements ListingService {
         return getListingDtoResponsePage(params, categoryId, page, limit, sortBy, orderBy);
     }
 
+    public List<ListingAttributeDto> getAllAttributesForListing(long id) {
+        Listing listing = listingRepository.findById(id)
+                .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
+
+        return listing.getAttributes()
+                .stream()
+                .map(listingAttribute -> modelMapper.map(listingAttribute, ListingAttributeDto.class))
+                .collect(Collectors.toList());
+    }
+
     @Override
     public void addListingToFavourites(long listingId, long userId) {
         Listing listing = listingRepository.findById(listingId)
@@ -157,27 +153,25 @@ public class ListingServiceImpl implements ListingService {
         userRepository.save(user);
     }
 
+    private void setSubcategoriesList(ListingDtoResponse listing) {
+        List<CategoryDtoResponse> categories = new ArrayList<>();
+        CategoryDtoResponse category = listing.getCategory();
+        category.setSubcategories(null);
+        categories.add(category);
 
-//
-//    private void setSubcategoriesList(ListingDtoResponse listing) {
-//        List<CategoryDtoResponse> categories = new ArrayList<>();
-//        CategoryDtoResponse category = listing.getCategory();
-//        category.setSubcategories(null);
-//        categories.add(category);
-//
-//        while (category.getParentCategory() != null) {
-//            category = category.getParentCategory();
-//            category.setSubcategories(null);
-//            categories.add(category);
-//        }
-//
-//        Collections.reverse(categories);
-//        for (int i = 0; i < categories.size() - 1; i++) {
-//            CategoryDtoResponse nextCategory = categories.get(i + 1);
-//            categories.get(i).setSubcategories(List.of(nextCategory));
-//        }
-//        listing.setCategory(categories.get(0));
-//    }
+        while (category.getParentCategory() != null) {
+            category = category.getParentCategory();
+            category.setSubcategories(null);
+            categories.add(category);
+        }
+
+        Collections.reverse(categories);
+        for (int i = 0; i < categories.size() - 1; i++) {
+            CategoryDtoResponse nextCategory = categories.get(i + 1);
+            categories.get(i).setSubcategories(List.of(nextCategory));
+        }
+        listing.setCategory(categories.get(0));
+    }
 
     @Override
     public ListingDtoResponse addListing(ListingDto listingDto, long userId) {
