@@ -22,6 +22,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Attr;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,6 +45,7 @@ public class ListingServiceImpl implements ListingService {
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
     private final CategoryRepository categoryRepository;
+    private final ListingAttributeRepository listingAttributeRepository;
     private final SpecificationFactory specificationFactory;
 
     @Override
@@ -60,8 +63,8 @@ public class ListingServiceImpl implements ListingService {
 
         Page<ListingDtoResponse> dtoResultPage = listingPage.map(listing -> {
             ListingDtoResponse dto = modelMapper.map(listing, ListingDtoResponse.class);
-            setSubcategoriesList(dto);
-            setSelectedValuesList(dto);
+            //setSubcategoriesList(dto);
+            //setSelectedValuesList(dto);
             return dto;
         });
 
@@ -82,17 +85,22 @@ public class ListingServiceImpl implements ListingService {
     public ListingDtoResponse getListingById(long id) {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
+
         ListingDtoResponse listingResponse = modelMapper.map(listing, ListingDtoResponse.class);
 
-        System.out.println();
-        List<ListingDetailValueDto> values = listingResponse.getDetails().get(0).getDetailValues();
-
-        for (ListingDetailValueDto value : values) {
-            System.out.println(value.getAttributeValue().getValue());
+        for (ListingAttribute attribute : listing.getAttributes()) {
+            System.out.println(attribute.getAttributeValues().size());
         }
 
-        setSubcategoriesList(listingResponse);
-        setSelectedValuesList(listingResponse);
+//        System.out.println();
+//        List<ListingDetailValueDto> values = listingResponse.getDetails().get(0).getDetailValues();
+//
+//        for (ListingDetailValueDto value : values) {
+//            System.out.println(value.getAttributeValue().getValue());
+//        }
+//
+//        setSubcategoriesList(listingResponse);
+//        setSelectedValuesList(listingResponse);
 
         return listingResponse;
     }
@@ -114,8 +122,8 @@ public class ListingServiceImpl implements ListingService {
                 .findAllByUserAndIdIn(user, favoriteListingIds, pageable)
                 .map(listing -> {
                     ListingDtoResponse response = modelMapper.map(listing, ListingDtoResponse.class);
-                    setSubcategoriesList(response);
-                    setSelectedValuesList(response);
+                    //setSubcategoriesList(response);
+                    //setSelectedValuesList(response);
                     return response;
                 });
 
@@ -149,36 +157,27 @@ public class ListingServiceImpl implements ListingService {
         userRepository.save(user);
     }
 
-    private void setSelectedValuesList(ListingDtoResponse listing) {
-        List<ListingDetailDtoResponse> details = listing.getDetails();
-        for (ListingDetailDtoResponse detail : details) {
-            List<Long> ids = new ArrayList<>();
-            for (ListingDetailValueDto detailValue : detail.getDetailValues()) {
-                ids.add(detailValue.getAttributeValue().getId());
-            }
-            detail.setSelectedValues(ids);
-        }
-    }
 
-    private void setSubcategoriesList(ListingDtoResponse listing) {
-        List<CategoryDtoResponse> categories = new ArrayList<>();
-        CategoryDtoResponse category = listing.getCategory();
-        category.setSubcategories(null);
-        categories.add(category);
-
-        while (category.getParentCategory() != null) {
-            category = category.getParentCategory();
-            category.setSubcategories(null);
-            categories.add(category);
-        }
-
-        Collections.reverse(categories);
-        for (int i = 0; i < categories.size() - 1; i++) {
-            CategoryDtoResponse nextCategory = categories.get(i + 1);
-            categories.get(i).setSubcategories(List.of(nextCategory));
-        }
-        listing.setCategory(categories.get(0));
-    }
+//
+//    private void setSubcategoriesList(ListingDtoResponse listing) {
+//        List<CategoryDtoResponse> categories = new ArrayList<>();
+//        CategoryDtoResponse category = listing.getCategory();
+//        category.setSubcategories(null);
+//        categories.add(category);
+//
+//        while (category.getParentCategory() != null) {
+//            category = category.getParentCategory();
+//            category.setSubcategories(null);
+//            categories.add(category);
+//        }
+//
+//        Collections.reverse(categories);
+//        for (int i = 0; i < categories.size() - 1; i++) {
+//            CategoryDtoResponse nextCategory = categories.get(i + 1);
+//            categories.get(i).setSubcategories(List.of(nextCategory));
+//        }
+//        listing.setCategory(categories.get(0));
+//    }
 
     @Override
     public ListingDtoResponse addListing(ListingDto listingDto, long userId) {
@@ -191,30 +190,25 @@ public class ListingServiceImpl implements ListingService {
         listing.setUser(user);
 
         listing = listingRepository.save(listing);
-        //setListingDetails(listing, listingDto.getDetails());
 
-        entityManager.clear();
+        setListingAttributes(listing, listingDto.getAttributes());
+
         return getListingById(listing.getId());
     }
 
     @Override
-    public ListingDtoResponse updateListing(long id, ListingDtoUpdate listingDto) {
+    public ListingDtoResponse updateListing(long id, ListingDto listingDto) {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ResourceDoesNotExistException(LISTING_DOES_NOT_EXIST));
 
         handleCategoryChange(listingDto, listing);
-        //listingDetailService.deleteAllForListing(listing);
-
         modelMapper.map(listingDto, listing);
-        
-        listing.setLastUpdatedAt(LocalDateTime.now());
-        //setListingDetails(listing, listingDto.getDetails());
+        setListingAttributes(listing, listingDto.getAttributes());
 
-        entityManager.clear();
         return getListingById(id);
     }
 
-    private void handleCategoryChange(ListingDtoUpdate listingDto, Listing listing) {
+    private void handleCategoryChange(ListingDto listingDto, Listing listing) {
         if (!Objects.equals(listingDto.getCategory().getId(), listing.getCategory().getId())) {
             Category newCategory = categoryRepository.findById(listingDto.getCategory().getId())
                     .orElseThrow(() -> new ResourceDoesNotExistException(CATEGORY_DOES_NOT_EXIST));
@@ -222,26 +216,32 @@ public class ListingServiceImpl implements ListingService {
         }
     }
 
-//    private void setListingDetails(Listing listing, List<ListingDetailDto> details) {
-//        for (ListingDetailDto detail : details) {
-//            ListingDetail listingDetail = new ListingDetail();
-//
-//            listingDetail.setListing(listing);
-//            listingDetail.setValue(detail.getValue());
-//
-//            listingDetail.setAttribute(modelMapper.map(detail.getAttribute(), Attribute.class));
-//            listingDetail = listingDetailRepository.save(listingDetail);
-//
-//            for (ListingDetailValueDto detailValue : detail.getDetailValues()) {
-//                ListingDetailValue listingDetailValue = new ListingDetailValue();
-//
-//                listingDetailValue.setListingDetail(listingDetail);
-//                listingDetailValue. setAttributeValue(modelMapper.map(detailValue.getAttributeValue(), AttributeValue.class));
-//
-//                listingDetailValueRepository.save(listingDetailValue);
-//            }
-//        }
-//    }
+    private void setListingAttributes(Listing listing, List<ListingAttributeDto> attributes) {
+        for (ListingAttributeDto listingAttributeDto : attributes) {
+            ListingAttribute listingAttribute = new ListingAttribute();
+
+            ListingAttributeId listingAttributeId = new ListingAttributeId();
+            listingAttributeId.setListingId(listing.getId());
+            listingAttributeId.setAttributeId(listingAttributeDto.getAttribute().getId());
+
+            listingAttribute.setListingAttributeId(listingAttributeId);
+            listingAttribute.setListing(listing);
+            listingAttribute.setAttribute(modelMapper.map(listingAttributeDto.getAttribute(), Attribute.class));
+            listingAttribute.setValue(listingAttributeDto.getValue());
+            listingAttribute.setAttributeValues(new HashSet<>());
+
+            listingAttributeRepository.save(listingAttribute);
+
+            Set<AttributeValue> attributeValues = new HashSet<>();
+            for (AttributeValueDtoResponse attributeValueDto : listingAttributeDto.getAttribute().getAttributeValues()) {
+                AttributeValue attributeValue = modelMapper.map(attributeValueDto, AttributeValue.class);
+                attributeValues.add(attributeValue);
+            }
+            listingAttribute.setAttributeValues(attributeValues);
+
+            listingAttributeRepository.save(listingAttribute);
+        }
+    }
 
     @Override
     public void deleteListing(long id) {

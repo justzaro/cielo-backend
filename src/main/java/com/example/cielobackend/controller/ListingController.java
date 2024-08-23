@@ -47,7 +47,7 @@ public class ListingController {
 
     @PutMapping("/{id}")
     public ListingDtoResponse updateListing(@PathVariable long id,
-                                            @RequestBody @Valid ListingDtoUpdate listingDto) {
+                                            @RequestBody @Valid ListingDto listingDto) {
         return listingService.updateListing(id, listingDto);
     }
 

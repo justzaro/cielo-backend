@@ -29,7 +29,6 @@ public class ListingDto {
     @Size(min = 1, max = 50, message = "Contact name should be between 5 and 50 characters!")
     private String contactName;
 
-    @NotNull
     @DecimalMin("0.01")
     private Double price;
 
@@ -50,5 +49,5 @@ public class ListingDto {
     @NotNull
     private CategoryDtoResponse category;
 
-    private List<ListingDetailDto> details;
+    private List<ListingAttributeDto> attributes;
 }
