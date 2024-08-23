@@ -51,5 +51,5 @@ public class ListingDtoResponse {
 
     private List<ListingImageDtoResponse> images;
 
-    private List<ListingDetailDtoResponse> details;
+    private List<ListingAttributeDto> attributes;
 }

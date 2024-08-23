@@ -11,7 +11,7 @@ import java.util.Map;
 
 public interface ListingService {
     ListingDtoResponse addListing(ListingDto listingDto, long userId);
-    ListingDtoResponse updateListing(long id, ListingDtoUpdate listingDto);
+    ListingDtoResponse updateListing(long id, ListingDto listingDto);
     Page<ListingDtoResponse> getListings(Map<String, String[]> parameterMap,
                                          int categoryId, int page, int limit,
                                          String sortBy, String orderBy);

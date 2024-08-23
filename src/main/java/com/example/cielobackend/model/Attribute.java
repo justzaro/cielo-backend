@@ -22,9 +22,22 @@ public class Attribute {
     @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<AttributeValue> attributeValues;
 
-    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "attribute")
     private Set<ListingAttribute> listingAttributes;
 
     @ManyToMany(mappedBy = "attributes")
     private Set<Category> categories;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Attribute attribute = (Attribute) o;
+        return Objects.equals(id, attribute.id) && Objects.equals(name, attribute.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
 }

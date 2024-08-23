@@ -6,10 +6,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @Entity
@@ -87,7 +84,7 @@ public class Listing {
     @OneToMany(mappedBy = "listing", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<ListingImage> images;
 
-    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "listing")
     private Set<ListingAttribute> attributes;
 
     @ManyToMany(mappedBy = "favouriteListings")
