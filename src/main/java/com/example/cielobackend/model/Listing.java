@@ -84,10 +84,10 @@ public class Listing {
     @OneToMany(mappedBy = "listing", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<ListingImage> images;
 
-    @OneToMany(mappedBy = "listing")
+    @OneToMany(mappedBy = "listing", fetch = FetchType.LAZY)
     private Set<ListingAttribute> attributes;
 
-    @ManyToMany(mappedBy = "favouriteListings")
+    @ManyToMany(mappedBy = "favouriteListings", fetch = FetchType.LAZY)
     private Set<User> favouritedBy;
 
     @Override

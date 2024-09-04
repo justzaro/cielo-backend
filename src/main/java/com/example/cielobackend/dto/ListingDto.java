@@ -2,6 +2,7 @@ package com.example.cielobackend.dto;
 
 import com.example.cielobackend.common.enums.ListingType;
 import com.example.cielobackend.common.enums.QualityType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -9,6 +10,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data

@@ -10,6 +10,7 @@ import com.example.cielobackend.pagination.AbstractSpecification;
 import com.example.cielobackend.pagination.PaginationUtils;
 import com.example.cielobackend.pagination.SpecificationFactory;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 
@@ -44,6 +45,8 @@ public class ListingServiceImpl implements ListingService {
     private final ListingRepository listingRepository;
     private final CategoryRepository categoryRepository;
     private final ListingAttributeRepository listingAttributeRepository;
+    @PersistenceContext
+    private final EntityManager entityManager;
     private final SpecificationFactory specificationFactory;
 
     @Override
@@ -197,6 +200,7 @@ public class ListingServiceImpl implements ListingService {
 
         handleCategoryChange(listingDto, listing);
         modelMapper.map(listingDto, listing);
+        removeAllListingAttributes(listing);
         setListingAttributes(listing, listingDto.getAttributes());
 
         return getListingById(id);
@@ -254,5 +258,28 @@ public class ListingServiceImpl implements ListingService {
         }
     }
 
+    @Transactional
+    public void removeAllListingAttributes(Listing listing) {
+        Set<ListingAttribute> listingAttributes = listing.getAttributes();
+        if (listingAttributes == null || listingAttributes.isEmpty()) {
+            return;
+        }
+
+        for (ListingAttribute listingAttribute : new HashSet<>(listingAttributes)) {
+            for (AttributeValue attributeValue : listingAttribute.getAttributeValues()) {
+                attributeValue.getListingAttributes().remove(listingAttribute);
+            }
+
+            listingAttribute.getAttributeValues().clear();
+
+            listing.getAttributes().remove(listingAttribute);
+
+            Attribute attribute = listingAttribute.getAttribute();
+            if (attribute != null) {
+                attribute.getListingAttributes().remove(listingAttribute);
+            }
+            listingAttributeRepository.delete(listingAttribute);
+        }
+    }
 
 }

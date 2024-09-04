@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import java.time.LocalDateTime;
 
 @SpringBootApplication
+@EnableTransactionManagement
 @EnableScheduling
 @EnableCaching
 public class CieloBackendApplication {

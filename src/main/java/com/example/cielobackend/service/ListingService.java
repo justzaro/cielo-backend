@@ -3,7 +3,6 @@ package com.example.cielobackend.service;
 import com.example.cielobackend.dto.ListingAttributeDto;
 import com.example.cielobackend.dto.ListingDto;
 import com.example.cielobackend.dto.ListingDtoResponse;
-import com.example.cielobackend.dto.ListingDtoUpdate;
 import com.example.cielobackend.model.ListingImage;
 import org.springframework.data.domain.Page;
 

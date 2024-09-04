@@ -3,7 +3,6 @@ package com.example.cielobackend.controller;
 import com.example.cielobackend.dto.ListingAttributeDto;
 import com.example.cielobackend.dto.ListingDto;
 import com.example.cielobackend.dto.ListingDtoResponse;
-import com.example.cielobackend.dto.ListingDtoUpdate;
 import com.example.cielobackend.service.ListingService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
